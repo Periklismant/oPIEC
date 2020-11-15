@@ -37,6 +37,7 @@ simpleFluent(meeting(_ID1,_ID2)).
 simpleFluent(fighting(_ID1,_ID2)).
 simpleFluent(moving(_ID1,_ID2)).
 simpleFluent(leaving_object(_ID1,_ID2)).
+simpleFluent(person(_ID)).
 
 
 % ===== DEFINE STATICALLY DETERMINED FLUENTS
@@ -50,12 +51,12 @@ leaveDist(30).
 
 % close/3
 
-holdsAt( close(Person1, Person2, Threshold) = true, T ) :-
-	holdsAt( distance(Person1, Person2) = Dist, T ),
+holdsAt(close(Person1, Person2, Threshold) = true, T) :-
+	holdsAt(distance(Person1,Person2)=Dist, T),
 	Dist =< Threshold.
 
-holdsAt( close(Person1, Person2, Threshold) = false, T ) :-
-	holdsAt( distance(Person1, Person2) = Dist, T ),
+holdsAt(close(Person1, Person2, Threshold) = false, T) :-
+	holdsAt(distance(Person1,Person2)=Dist, T),
 	Dist > Threshold.
 
 holdsAt( distance(Person1, Person2) = Ypot, T ) :-
@@ -88,8 +89,6 @@ initiatedAt( person(Id)=true, T ) :-
 initiatedAt( person(Id)=false, T) :-
    happensAt( disappear(Id), T).
 
-
-
 % ==================================================
 % LONG-TERM BEHAVIOUR: fighting(Person, Person2)
 % ==================================================
@@ -100,7 +99,7 @@ initiatedAt( person(Id)=false, T) :-
 initiatedAt(fighting(Person, Person2) = true, T):-
 	happensAt(running(Person), T),
 	fightDist(Dist),
-	holdsAt(close(Person, Person2, Dist) = true, T),
+	cached(holdsAt(close(Person, Person2, Dist) = true)),
 	%negate(happensAt(inactive(Person2), T)),
 	\+ happensAt(inactive(Person2), T),
 	\+ happensAt(disappear(Person), T),
@@ -110,7 +109,7 @@ initiatedAt(fighting(Person, Person2) = true, T):-
 initiatedAt(fighting(Person, Person2) = true, T):-
 	happensAt(active(Person), T),
 	fightDist(Dist),
-	holdsAt(close(Person, Person2, Dist) = true, T),
+	cached(holdsAt(close(Person, Person2, Dist) = true)),
 	%negate(happensAt(inactive(Person2), T)),
 	%negate(happensAt(running(Person2), T)),
 	\+ happensAt(inactive(Person2), T),
@@ -123,22 +122,22 @@ initiatedAt(fighting(Person, Person2) = true, T):-
 initiatedAt(fighting(Person, Person2) = false, T):-
 	happensAt(walking(Person), T),
 	fightDist(Dist),
-	holdsAt(close(Person, Person2, Dist) = false, T).
+	cached(holdsAt(close(Person, Person2, Dist) = false)).
 
 initiatedAt(fighting(Person2, Person) = false, T):-
 	happensAt(walking(Person), T),
 	fightDist(Dist),
-	holdsAt(close(Person, Person2, Dist) = false, T).
+	cached(holdsAt(close(Person, Person2, Dist) = false)).
 
 initiatedAt(fighting(Person, Person2) = false, T):-
 	happensAt(running(Person), T),
 	fightDist(Dist),
-	holdsAt(close(Person, Person2, Dist) = false, T).
+	cached(holdsAt(close(Person, Person2, Dist) = false)).
 
 initiatedAt(fighting(Person2, Person) = false, T):-
 	happensAt(running(Person), T),
 	fightDist(Dist),
-	holdsAt(close(Person, Person2, Dist) = false, T).
+	cached(holdsAt(close(Person, Person2, Dist) = false)).
 
 initiatedAt(fighting(Person, _) = false, T):-
 	happensAt(disappear(Person), T).
@@ -158,20 +157,24 @@ initiatedAt(fighting(_, Person) = false, T):-
 
 initiatedAt(meeting(Person, Person2) = true, T):-
 	happensAt(active(Person), T),
+	debugprint("Is person."),
 	interactDist(Dist),
 	holdsAt(close(Person, Person2, Dist) = true, T),
-	holdsAt(person(Person2) = true, T),
+	debugprint("Close OK."),
+	cached(holdsAt(person(Person2) = true)),
+	debugprint("Is person 2"),
 	%negate(happensAt(running(Person2), T)),
 	\+ happensAt(running(Person2), T),
 	\+ happensAt(disappear(Person), T),
-	\+ happensAt(disappear(Person2), T).
+	\+ happensAt(disappear(Person2), T),
+	debugprint("MATCH").
 
 initiatedAt(meeting(Person, Person2) = true, T):-
-	holdsAt(person(Person) = true, T),
+	cached(holdsAt(person(Person) = true)),
 	happensAt(inactive(Person), T),
 	interactDist(Dist),
 	holdsAt(close(Person, Person2, Dist) = true, T),
-	holdsAt(person(Person2) = true, T),
+	cached(holdsAt(person(Person2) = true)),
 	%negate(happensAt(running(Person2), T)),
 	%negate(happensAt(active(Person2), T)),
 	\+ happensAt(running(Person2), T),
@@ -215,12 +218,12 @@ initiatedAt(meeting(_, Person) = false, T):-
 initiatedAt(moving(Person, Person2) = true, T):-
 	happensAt(walking(Person), T),
 	moveDist( Dist ),
-	holdsAt( close(Person, Person2, Dist)=true, T ),
+	holdsAt(close(Person, Person2, Dist)=true, T),
 	happensAt( walking(Person2), T ), % This will be enough to prove that Person2 is a person entity as well.
 	\+ happensAt(disappear(Person), T),
 	\+ happensAt(disappear(Person2), T),
-	holdsAt( orientation(Person)=O, T ),
-	holdsAt( orientation(Person2)=O2, T ),
+	holdsAt(orientation(Person)=O, T),
+	holdsAt(orientation(Person2)=O2, T),
 	Diff is abs(O-O2),
 	Diff < 45.
 
@@ -229,12 +232,12 @@ initiatedAt(moving(Person, Person2) = true, T):-
 initiatedAt(moving(Person, Person2) = false, T):-
 	happensAt(walking(Person), T),
 	moveDist( Dist ),
-	holdsAt( close(Person, Person2, Dist)=false, T ).
+	holdsAt(close(Person, Person2, Dist)=false, T).
 
 initiatedAt(moving(Person2, Person) = false, T):-
 	happensAt(walking(Person), T),
 	moveDist( Dist ),
-	holdsAt( close(Person, Person2, Dist)=false, T ).
+	holdsAt(close(Person, Person2, Dist)=false, T).
 
 % ----- terminate moving: stop moving
 
@@ -279,8 +282,8 @@ initiatedAt(leaving_object(Person, Object) = true, T):-
 	happensAt(inactive(Object), T),
 	holdsAt(appearance(Object) = appear, T),
 	leaveDist( Dist ),
-	holdsAt( close(Person, Object, Dist)=true, T),
-	holdsAt(person(Person) = true, T).
+	cached(holdsAt(close(Person, Object, Dist)=true)),
+	cached(holdsAt(person(Person)=true)).
 
 % ----- terminate leaving_object: pick up object
 %       disappear(Object) means that the Object has disappeared
@@ -288,7 +291,6 @@ initiatedAt(leaving_object(Person, Object) = true, T):-
 
 initiatedAt(leaving_object(_, Object) = false, T):-
 	happensAt(disappear(Object), T).
-
 
 % ====================================
 % DEFINITION OF DERIVED EVENTS

@@ -23,11 +23,11 @@ performFullER:-
   Timepoints=[FirstTimepoint|_Rest],
   cartesianUnique(IDs,IDs,Tuples), % Tuples is a list of lists, of form [[id0, id1], [id0, id2], ... , [idn, idn-1]]
   debugprint(Tuples),
-  Events=[moving,meeting,leaving_object],
+  Events=[moving, meeting],
   debugprint("Getting Initial Values"),
   getInitially(Events, Tuples, FirstTimepoint),
   debugprint("Stating Event Recognition"),
-  eventRec(Timepoints,Tuples, Events).
+  eventRec(Timepoints, IDs, Tuples, Events).
 
 debugprintList([]).
 
@@ -52,13 +52,22 @@ allIDs(IDs):- findall(ID, holdsAt(appearance(ID)=_,_),IDs1), sort(IDs1, IDs).
 % Perform ER for all fluents per timepoint
 %
 
-eventRec([], _Tuples, _Events).
+eventRec([], _IDs, _Tuples, _Events).
 
-eventRec([Timepoint | RestTimePoints], Tuples, Events):-
+eventRec([Timepoint | RestTimePoints], IDs, Tuples, Events):-
+  debugprint("Timepoint: ", Timepoint),
+  recPersons(Timepoint, IDs),
   recAllHLEs(Timepoint, Tuples, Events), 
   retractall(prevtimepoint(_)),
   assertz(prevtimepoint(Timepoint)),
-  eventRec(RestTimePoints, Tuples, Events).
+  eventRec(RestTimePoints, IDs, Tuples, Events).
+
+recPersons(_Timepoint, []).
+
+recPersons(Timepoint, [ID|RestIDs]):-
+  Fluent=person(ID),
+  recognize(Fluent, Timepoint, true), 
+  recPersons(Timepoint, RestIDs).
 
 recAllHLEs(_Timepoint, _Tuples, []).
 
@@ -70,7 +79,8 @@ recHLE(_Timepoint, [], _Events).
 
 recHLE(Timepoint, [Tuple|RestTuples], Event):-
   Tuple = [ID1, ID2],
-  recognize(Event, Timepoint, true), 
+  Fluent =.. [Event, ID1, ID2],
+  recognize(Fluent, Timepoint, true), 
   recHLE(Timepoint, RestTuples, Event).
 
 recognize(Fluent, T, Value):-

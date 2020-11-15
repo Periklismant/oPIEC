@@ -20,8 +20,6 @@
    debugprint("Getting inertia rules"),
    ['prob_ec_cached'],
    debugprint("Getting initially"),
-
-   
    ['eventDescription/prob_initially.pl'],
    % Hierarchy constructed here.
    debugprint("Getting utilities"),

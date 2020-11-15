@@ -1,3 +1,9 @@
+
+simpleFluent(meeting(_ID1,_ID2)).
+simpleFluent(fighting(_ID1,_ID2)).
+simpleFluent(moving(_ID1,_ID2)).
+simpleFluent(leaving_object(_ID1,_ID2)).
+
 holdsAt(F=V,T):-
   simpleFluent(F),
   cached(holdsAt(F = V)),
