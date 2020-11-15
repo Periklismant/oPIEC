@@ -6,8 +6,8 @@ from CAVIARCEDurations import *
 
 #durationsDict = buildDurationsCAVIAR(WM_size) #with keys: 'moving', 'meeting', 'fighting'
 
-groundAnnotation=getAnnotation()
-metrics=dict()
+#groundAnnotation=getAnnotation()
+#metrics=dict()
 
 def createMetricsPlot():
 	names = list(map(lambda x:x[0], systems))
@@ -387,4 +387,5 @@ def runAMAIexperiments():
 	noises=['smooth']#['smooth','strong']
 	getProbEC_CAVIAR(systems=systems, threshold=threshold, WM_sizes=WM_sizes_fast,batchsizes=batchsizes,events=events,noises=noises)
 
-runAMAIexperiments()
+runInput()
+#runAMAIexperiments()

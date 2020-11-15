@@ -2,7 +2,7 @@ import sys
 
 def get_input_and_fill(name):
 	'''ProbEC recognition to PIEC input array'''
-	f=open(name + '.pl','r')
+	f=open('../recognition/' + name + '.pl','r')
 	PIECins = dict()
 	Tprevs = dict()
 	probprevs = dict()
@@ -26,7 +26,7 @@ def get_input_and_fill(name):
 	for key in PIECins:
 		problist = PIECins[key]
 		if len(problist)>1:
-			fw=open('./PIEC_input/' + name + '_' + key + '.input', 'w')
+			fw=open('../PIEC_input/' + name + '_' + key + '.input', 'w')
 			for prob in problist:
 				fw.write(str(prob) + '\n')
 			fw.close()

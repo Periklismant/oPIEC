@@ -1,13 +1,25 @@
-events=("meeting" "moving")
-values=("true" "true")
-fileName="Walk1-smooth-1.0"
+#!/bin/bash
 
-cd ../Prob-EC_output &&
+#events=("meeting" "moving")
+#values=("true" "true")
+#fileName="Walk1-smooth-1.0"
+#events=("loitering")
+#values=("true")
+#fileName="loitering_test"
+#pythonVersion="3.8"
+
+IFS=',' read -r -a events <<< "$1"
+IFS=',' read -r -a values <<< "$2"
+fileName="$3"
+pythonVersion="$4"
+
+cd ../Prob-EC_output/preproccessed &&
 sed -i 's/"//g; s/ //g' ${fileName}.result &&
 LastIndex=$((${#events[@]}-1))
 echo ${LastIndex}
 for i in $(seq 0 ${LastIndex}) #${0..${LastIndex}}
 do
-	sed  '/'${events[$i]}\([^\)]*\)\=${values[$i]}'/!d' ${fileName}.result > ${fileName}_${events[$i]}_${values[$i]}.pl
-	python3 ../scripts/pythonScripts/getPIECinput.py ${fileName}_${events[$i]}_${values[$i]}
+	sed  '/'${events[$i]}\([^\)]*\)\=${values[$i]}'/!d' ${fileName}.result > ../recognition/${fileName}_${events[$i]}_${values[$i]}.pl &&
+	python${pythonVersion} ../../scripts/pythonScripts/getPIECinput.py ${fileName}_${events[$i]}_${values[$i]}
 done
+cd ../../scripts 

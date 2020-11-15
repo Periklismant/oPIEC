@@ -308,12 +308,23 @@ def oPIEC(inputArray, threshold, start_timestamp=0, ignore_value=sys.maxsize, su
 
 	return result, support_set, prev_prefix, ignore_value, end_timestamp 
 
+def runoPIEC(fileName, threshold=0.9, batchsize=5, WM_size=100, ssResolver=(smallestRanges, None)):
+	filePath = '../../Prob-EC_output/PIEC_input/' + fileName
+	f=open(filePath, 'r')
+	inputArray=list()
+	for line in f:
+		inputArray.append(float(line.strip()))
+	oPIECresult = run_batches(inputArray, threshold, WM_size=WM_size, batchsize=batchsize, ssResolver=ssResolver, verbose=False)
+	print(oPIECresult)
+	return 
 
-resolver1=(smallestRanges, None)
-myDurations=[(2,4),(7,13)] 
-resolver2=(smoothing.durationLikelihood, myDurations)
-print(run_batches([0, 0.5, 0.7, 0.9, 0.4, 0.1, 0, 0, 0.5, 1], 0.5, batchsize=2, WM_size=2, ssResolver=resolver1, verbose=True))
-print(run_batches([0, 0.5, 0.7, 0.9, 0.4, 0.1, 0, 0, 0.5, 1], 0.5, batchsize=2, WM_size=2, ssResolver=resolver2, verbose=True))
+runoPIEC(sys.argv[1])
+
+#resolver1=(smallestRanges, None)
+#myDurations=[(2,4),(7,13)] 
+#resolver2=(smoothing.durationLikelihood, myDurations)
+#print(run_batches([0, 0.5, 0.7, 0.9, 0.4, 0.1, 0, 0, 0.5, 1], 0.5, batchsize=2, WM_size=2, ssResolver=resolver1, verbose=True))
+#print(run_batches([0, 0.5, 0.7, 0.9, 0.4, 0.1, 0, 0, 0.5, 1], 0.5, batchsize=2, WM_size=2, ssResolver=resolver2, verbose=True))
 
 #print(run_batches([0,0,0,0,0,0,0.2,0.6,0.8,0.9,1,1,0.8,0.6,0.34,0.1,0.1,0.5,0.66,0.9,1,1,1,1,0.8,0.8,0.7,0.2,0,0,0,0,0,0,0,0,0],0.7, 2, WM_size=8))#ssResolver=(smoothing.HoltPrediction, [0.6, 0.6]),verbose=True, durerror=(18, 7)))
 #print(run_batches([0, 0, 0.6, 0.83, 0.92, 0.01, 0.01, 0.7, 0.82, 0.92],0.6, 2))

@@ -157,17 +157,13 @@ initiatedAt(fighting(_, Person) = false, T):-
 
 initiatedAt(meeting(Person, Person2) = true, T):-
 	happensAt(active(Person), T),
-	debugprint("Is person."),
 	interactDist(Dist),
 	holdsAt(close(Person, Person2, Dist) = true, T),
-	debugprint("Close OK."),
 	cached(holdsAt(person(Person2) = true)),
-	debugprint("Is person 2"),
 	%negate(happensAt(running(Person2), T)),
 	\+ happensAt(running(Person2), T),
 	\+ happensAt(disappear(Person), T),
-	\+ happensAt(disappear(Person2), T),
-	debugprint("MATCH").
+	\+ happensAt(disappear(Person2), T).
 
 initiatedAt(meeting(Person, Person2) = true, T):-
 	cached(holdsAt(person(Person) = true)),

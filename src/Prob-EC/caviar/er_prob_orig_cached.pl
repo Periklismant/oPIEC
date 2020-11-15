@@ -12,9 +12,11 @@
 
 :- debugprint("Asserting appearance SDEs"), 
    % Since string manipulation is not supported in Problog, we set the input files by hand.
-   ['../../../inputDatasets/caviar/original/01-Walk1/smooth/1.0/wk1gtAppearanceIndv_smooth.pbl'],
+   %['../../../inputDatasets/caviar/original/01-Walk1/smooth/1.0/wk1gtAppearanceIndv_smooth.pbl'],
+   ['../../../inputDatasets/examples/wk1gtAppearanceIndv_smooth.pbl'],
    debugprint("Asserting movement SDEs"),
-   ['../../../inputDatasets/caviar/original/01-Walk1/smooth/1.0/wk1gtMovementIndv_smooth.pbl'],
+   %['../../../inputDatasets/caviar/original/01-Walk1/smooth/1.0/wk1gtMovementIndv_smooth.pbl'],
+   ['../../../inputDatasets/examples/wk1gtMovementIndv_smooth.pbl'],
    debugprint("Getting patterns"),
    ['eventDescription/prob_event_defs_orig_cached.pl'],
    debugprint("Getting inertia rules"),
