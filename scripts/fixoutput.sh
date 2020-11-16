@@ -13,7 +13,7 @@ IFS=',' read -r -a values <<< "$2"
 fileName="$3"
 pythonVersion="$4"
 
-cd ../Prob-EC_output/preproccessed &&
+cd ../Prob-EC_output/preprocessed &&
 sed -i 's/"//g; s/ //g' ${fileName}.result &&
 LastIndex=$((${#events[@]}-1))
 

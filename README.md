@@ -19,6 +19,9 @@ Point-based probabilistic event recognition is achieved with Prob-EC. Afterwards
 - /scripts/ contains executable scripts for running the example datasets. 
   The parameters of each script can be adjust for the desired experiment.
 
-#### Instructions
+#### Execution Steps
 
-Running an example script, e.g. for maritime monitoring, executes the entire pipeline of systems, i.e. first runs Prob-EC and, then, oPIEC, using as input the output of Prob-EC. Prob-EC is executes by running a ProbLog2 program. The output of ProbLog2 is saved in the /Prob-EC_output/preprocessed/ folder. Afterwards, the script transforms the output of Prob-EC by isolating the probabilities computed for each event. As a result, the recognition of Prob-EC for each complex event is present in the /Prob-EC_output/recognition/ folder, while a oPIEC compatible version of the probabilities is present in the /Prob-EC_output/PIEC_input/ folder. Finally, the script executes oPIEC for each file in the latter folder which is associated with the selected events. Again, the parameters of oPIEC can be adjusted through the code of the script. The final output, produced by oPIEC, is stored in the /oPIEC_output/ folder. 
+Running an example script, e.g. for maritime monitoring, executes the entire pipeline of systems, i.e. first runs Prob-EC and, then, oPIEC, using as input the output of Prob-EC. 
+- Prob-EC is executed by running a ProbLog2 program. The output of ProbLog2 is saved in the /Prob-EC_output/preprocessed/ folder. 
+- Afterwards, the script transforms the output of Prob-EC by isolating the probabilities computed for each event. As a result, the recognition of Prob-EC for each complex event is present in the /Prob-EC_output/recognition/ folder, while a oPIEC compatible version of the probabilities is present in the /Prob-EC_output/PIEC_input/ folder. 
+- Finally, the script executes oPIEC for each file in the latter folder which is associated with the selected events. Again, the parameters of oPIEC can be adjusted through the code of the script. The final output, produced by oPIEC, is stored in the /oPIEC_output/ folder and denotes the maximal intervals during which the event takes place.

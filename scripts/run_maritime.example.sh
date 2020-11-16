@@ -10,7 +10,7 @@ for i in "${events[@]}"
 do
 	eventParam="${eventParam} -a $i"
 done &&
-#problog ../src/Prob-EC/maritime/er_prob_maritime_cached.pl -a ${inputPath} ${eventParam} > ../Prob-EC_output/preproccessed/${fileName}.result && #Change input files from code
+problog ../src/Prob-EC/maritime/er_prob_maritime_cached.pl -a ${inputPath} ${eventParam} > ../Prob-EC_output/preprocessed/${fileName}.result && #Change input files from code
 ./fixoutput.sh ${events} ${values} ${fileName} ${pythonVersion} &&
 cd ../src/oPIEC-python/ &&
 LastIndex=$((${#events[@]}-1)) &&
