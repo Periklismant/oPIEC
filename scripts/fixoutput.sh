@@ -16,7 +16,7 @@ pythonVersion="$4"
 cd ../Prob-EC_output/preproccessed &&
 sed -i 's/"//g; s/ //g' ${fileName}.result &&
 LastIndex=$((${#events[@]}-1))
-echo ${LastIndex}
+
 for i in $(seq 0 ${LastIndex}) #${0..${LastIndex}}
 do
 	sed  '/'${events[$i]}\([^\)]*\)\=${values[$i]}'/!d' ${fileName}.result > ../recognition/${fileName}_${events[$i]}_${values[$i]}.pl &&

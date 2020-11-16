@@ -1,21 +1,16 @@
-#! /usr/bin/python
 import numpy as np
 import sys
-import matplotlib
-import matplotlib.pyplot as plt
-#sys.path.append('/home/periklis/Desktop/code/')
+#import matplotlib
+#import matplotlib.pyplot as plt
 import smoothing
-#import ProbECgetDurations
 import os
-#import MarkovLearn
-import random
-#import getRTECintervals as RTEC
-import pprint
-from maritimeCEDuration import *
+#import random
+#import pprint
+#from maritimeCEDuration import *
 from utils import *
 from ssResolver import *
 from intervaltree import Interval, IntervalTree
-from time import time
+#from time import time
 
 def getCredible(tuples, probabilities):
 	#print(tuples)
@@ -308,14 +303,24 @@ def oPIEC(inputArray, threshold, start_timestamp=0, ignore_value=sys.maxsize, su
 
 	return result, support_set, prev_prefix, ignore_value, end_timestamp 
 
-def runoPIEC(fileName, threshold=0.9, batchsize=5, WM_size=100, ssResolver=(smallestRanges, None)):
-	filePath = '../../Prob-EC_output/PIEC_input/' + fileName
-	f=open(filePath, 'r')
-	inputArray=list()
-	for line in f:
-		inputArray.append(float(line.strip()))
-	oPIECresult = run_batches(inputArray, threshold, WM_size=WM_size, batchsize=batchsize, ssResolver=ssResolver, verbose=False)
-	print(oPIECresult)
+def runoPIEC(fileName, threshold=0.9, batchsize=1000, WM_size=100, ssResolver=(smallestRanges, None)):
+	baseFolder = '../../Prob-EC_output/PIEC_input/'
+	writeFolder = '../../oPIEC_output/'
+	inputFiles = [f.path for f in os.scandir(baseFolder) if (fileName in f.name)]
+	for filePath in inputFiles:
+		f=open(filePath, 'r')
+		inputArray=list()
+		for line in f:
+			inputArray.append(float(line.strip()))
+		f.close()
+		oPIECresult = run_batches(inputArray, threshold, WM_size=WM_size, batchsize=batchsize, ssResolver=ssResolver, verbose=False)
+		PMIs = list(map(lambda x:x[0], oPIECresult))
+		PMIprobabilities = list(map(lambda x: x[1], oPIECresult))
+		CrediblePMIs = getCredible(PMIs, PMIprobabilities)
+		writePath= writeFolder + filePath.split('/')[-1].replace('input','result')
+		fw=open(writePath, 'w+')
+		fw.write(str(CrediblePMIs))
+		fw.close()
 	return 
 
 runoPIEC(sys.argv[1])
