@@ -1,9 +1,9 @@
 ################################
 ########   oPIEC utils   #######
 ################################
-import os
-from intervaltree import Interval, IntervalTree
-import xml.dom.minidom
+#import os
+#from intervaltree import Interval, IntervalTree
+#import xml.dom.minidom
 
 #########   General    #########
 
@@ -17,6 +17,31 @@ def getKeys(dict):
     for key in dict.keys(): 
         mylist.append(key)  
     return mylist
+
+def get_input_and_fill(fpath):
+	'''ProbEC recognition to PIEC input array'''
+	f=open(fpath,'r')
+	PIECins = dict()
+	Tprevs = dict()
+	probprevs = dict()
+	for line in f:
+		prob = float(line.strip().split('::')[0])
+		params = line.strip().split("(")[-2].strip() + "_" + line.strip().split("(")[-1].strip().split(")")[0].replace(',', '_')
+		if params not in PIECins:
+			PIECins[params]=list()
+			Tprevs[params]=-1
+			probprevs[params]=-1
+		T = int(line.strip().split(',')[-1].replace(")","").replace(".",""))
+		#print(T)
+		if Tprevs[params]!=-1:
+			gapLength=T-Tprevs[params]
+			for Tmid in range(1, gapLength):
+				PIECins[params].append(probprevs[params])
+		PIECins[params].append(prob)
+		Tprevs[params]=T
+		probprevs[params]=prob
+	f.close()
+	return PIECins
 
 def timepoints_to_intervals(timepointList):
 	if len(timepointList)==0:
@@ -66,9 +91,32 @@ def parsePMIlist(pmiString):
 
 #########  for metrics and plots  ########
 
-
-
-	
+def find_pmi_accuracy(pmis_rec, pmis_ground):
+	pmisR = list(map(lambda x: x[0], pmis_rec))
+	pmisG = list(map(lambda x: x[0], pmis_ground))
+	toCompare = (pmisR, pmisG)
+	#print('toCompare ' + str(toCompare))
+	coverage = list()
+	for pmis in toCompare:
+		recent = (0, 0)
+		for (start, end) in pmis:
+			if end> recent[1]:
+				recent=(start,end)
+		last_timepoint = recent[1]
+		coverage.append(find_timepoints_covered_by_intervals(pmis, last_timepoint))
+	covR, covG = coverage
+	#print('Coverage ' + str(coverage))
+	tp, fp, fn = (0, 0, 0)
+	for t in covR:
+		if t in covG:
+			tp+=1
+		else:
+			fp+=1
+	for t in covG:
+		if t not in covR:
+			fn+=1
+	#print('metrics: tp=' + str(tp) + ' fp=' + str(fp) + ' fn=' + str(fn))
+	return tp, fp, fn
 
 ##########  for Brest  #########
 

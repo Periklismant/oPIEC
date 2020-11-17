@@ -1,33 +1,18 @@
-%:- multifile holdsAt/2, happensAt/2.
-%:-use_module(library(problog)).
-%:-use_module(library(problog/timer)).
-%:-use_module(library(lists)).
-%:- dynamic cache/1, temp_store/1, person/2, fighting/2, moving/2, meeting/2, leaving_object/2. % maybe only first two required
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% Perform ER for HLE: fight, move, meet and leaving_object
-% The resutls are stored into the specified 'Filename'
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
 %
 % Dynamic doesnt work. So instantiate helper predicates and retract asap.
 %
 prevtimepoint(0).
 
+% Currently works for `moving' and `meeting'.
 performFullER:-
-  %open(Filename, write, Stream),
-  debugprint("In full ER"),
   allIDs(IDs),
-  %debugprint(IDs),
   allTimePoints(Timepoints),
-  %debugprintList(Timepoints),
   Timepoints=[FirstTimepoint|_Rest],
   cartesianUnique(IDs,IDs,Tuples), % Tuples is a list of lists, of form [[id0, id1], [id0, id2], ... , [idn, idn-1]]
-  %debugprint(Tuples),
   Events=[moving, meeting],
-  debugprint("Getting Initial Values"),
   getInitially(Events, Tuples, FirstTimepoint),
-  debugprint("Stating Event Recognition"),
-  eventRec(Timepoints, IDs, Tuples, Events).
+  eventRec(Timepoints, IDs, Tuples, Events), 
+  debugprint("Event Recognition Completed Successfully").
 
 debugprintList([]).
 
@@ -42,11 +27,11 @@ debugprintList([H|T]):-
 %
 % Gives all timepoints
 %
-allTimePoints(SL):- findall(T, holdsAt(appearance(_)=_,T), L), removeAdjacentDuplicates(L,SL). %, quick_sort(L, SL).
+allTimePoints(SL):- findall(T, holdsAt(appearance(_)=_,T), L), removeAdjacentDuplicates(L,SL). % Find all time-points -- remove duplicates.
 %
 % Gives all ID instances
 %
-allIDs(IDs):- findall(ID, holdsAt(appearance(ID)=_,_),IDs1), sort(IDs1, IDs).
+allIDs(IDs):- findall(ID, holdsAt(appearance(ID)=_,_),IDs1), sort(IDs1, IDs). % Find all persons/objects.
 
 %
 % Perform ER for all fluents per timepoint
@@ -54,8 +39,7 @@ allIDs(IDs):- findall(ID, holdsAt(appearance(ID)=_,_),IDs1), sort(IDs1, IDs).
 
 eventRec([], _IDs, _Tuples, _Events).
 
-eventRec([Timepoint | RestTimePoints], IDs, Tuples, Events):-
-  debugprint("Timepoint: ", Timepoint),
+eventRec([Timepoint | RestTimePoints], IDs, Tuples, Events):- % Process video frames (timepoints) in order.
   recPersons(Timepoint, IDs),
   recAllHLEs(Timepoint, Tuples, Events), 
   retractall(prevtimepoint(_)),
@@ -64,33 +48,32 @@ eventRec([Timepoint | RestTimePoints], IDs, Tuples, Events):-
 
 recPersons(_Timepoint, []).
 
-recPersons(Timepoint, [ID|RestIDs]):-
+recPersons(Timepoint, [ID|RestIDs]):- % Recognize and assert all persons in video frame.
   Fluent=person(ID),
   recognize(Fluent, Timepoint, true), 
   recPersons(Timepoint, RestIDs).
 
 recAllHLEs(_Timepoint, _Tuples, []).
 
-recAllHLEs(Timepoint, Tuples, [Event|RestEvents]):-
+recAllHLEs(Timepoint, Tuples, [Event|RestEvents]):- % Iterate over selected events.
   recHLE(Timepoint, Tuples, Event),
   recAllHLEs(Timepoint, Tuples, RestEvents).
 
 recHLE(_Timepoint, [], _Events).
 
-recHLE(Timepoint, [Tuple|RestTuples], Event):-
+recHLE(Timepoint, [Tuple|RestTuples], Event):- % Iterate over tuples.
   Tuple = [ID1, ID2],
   Fluent =.. [Event, ID1, ID2],
   recognize(Fluent, Timepoint, true), 
   recHLE(Timepoint, RestTuples, Event).
 
-recognize(Fluent, T, Value):-
+recognize(Fluent, T, Value):- % Deduce the probability that ${Fluent} holds.
   nextTimePoint(T, Tnext),
-  subquery(holdsAt(Fluent=Value, Tnext), P),
-  subquery(cached(holdsAt(Fluent = Value)), Pcached),
+  subquery(holdsAt(Fluent=Value, Tnext), P), % Compute new probability: +cached_value + initiations - terminations (initiations with a different value).
+  subquery(cached(holdsAt(Fluent = Value)), Pcached), % Compare with cached value -> Update only if diffence is above 1%.
   Pdiff is abs(P-Pcached),
   ((Pdiff>0.01, 
   writenl(P, "::holdsAt(", Fluent, "=", Value, ", ", Tnext, ")."),
-  retractall(cached(holdsAt(Fluent = Value))), 
   assertz((P::cached(holdsAt(Fluent = Value)))));
   Pdiff =< 0.01).
 

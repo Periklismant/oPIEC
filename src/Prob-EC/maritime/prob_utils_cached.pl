@@ -12,20 +12,18 @@ performFullER:-
   allTimePoints(Timepoints),
   Timepoints=[FirstTimepoint|_Rest],
   cmd_args(Args),
-  Args = [_FileName|InputEvents],
-  debugprint("Input Events: "),
-  debugprint(InputEvents),
-  findDependencies(InputEvents, Events),
-  debugprint("Required Events: "),
-  debugprint(Events),
-  getInitially(Events, FirstTimepoint),
-  allVessels(Vessels),
-  debugprint("Vessels: ", Vessels),
-  allVesselTuples(Tuples),
-  %((length(Vessels,1), Tuples=[]); (length(Vessels, VesselNo), VesselNo>1, allVesselTuples(Tuples))), %Supposes that given vessels meet FIXME
-  debugprint("Tuples: ", Tuples),
+  Args = [_FileName|InputEvents], % Get target fluents from argvs.
+  %debugprint("Input Events: "),
+  %debugprint(InputEvents),
+  findDependencies(InputEvents, Events), % Get all the events that must be computed according to the event hierarchy. 
+  %debugprint("Required Events: "),
+  %debugprint(Events),
+  getInitially(Events, FirstTimepoint), % Assert the initial values of fluents.
+  allVessels(Vessels), % Get all the vessels of the input dataset.
+  allVesselTuples(Tuples), % Get all the vessels that `meet' as tuples.
+  %debugprint("Tuples: ", Tuples),
   findall(X, isArea(X), AllAreaTypes),
-  debugprint("Areas: ", AllAreaTypes),
+  %debugprint("Areas: ", AllAreaTypes),
   eventRec(Timepoints, Vessels, AllAreaTypes, Tuples, Events).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

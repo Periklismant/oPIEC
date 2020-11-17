@@ -1,19 +1,16 @@
-import numpy as np
 import sys
-#import matplotlib
-#import matplotlib.pyplot as plt
 import smoothing
 import os
-#import random
-#import pprint
-#from maritimeCEDuration import *
-from utils import *
+from utils import stripIntervalTree,get_input_and_fill
 from ssResolver import *
 from intervaltree import Interval, IntervalTree
-#from time import time
 
 def getCredible(tuples, probabilities):
-	#print(tuples)
+	'''Tuples is a list of intervals and probabilities is a list of floats (probability values) which indicate the probability of each interval in ${tuples}.
+	   The credility of an interval is measured as: length*probability.
+	   getCredible find the most credible interval within a region of overlapping intervals.
+	   The return value is a list of non-overlapping intervals constructed from the initial tuples.
+	   '''
 	if not tuples:
 		return []
 
@@ -42,34 +39,6 @@ def getCredible(tuples, probabilities):
 	overlap.append(currentInterval)
 	return overlap
 
-
-def find_pmi_accuracy(pmis_rec, pmis_ground):
-	pmisR = list(map(lambda x: x[0], pmis_rec))
-	pmisG = list(map(lambda x: x[0], pmis_ground))
-	toCompare = (pmisR, pmisG)
-	#print('toCompare ' + str(toCompare))
-	coverage = list()
-	for pmis in toCompare:
-		recent = (0, 0)
-		for (start, end) in pmis:
-			if end> recent[1]:
-				recent=(start,end)
-		last_timepoint = recent[1]
-		coverage.append(find_timepoints_covered_by_intervals(pmis, last_timepoint))
-	covR, covG = coverage
-	#print('Coverage ' + str(coverage))
-	tp, fp, fn = (0, 0, 0)
-	for t in covR:
-		if t in covG:
-			tp+=1
-		else:
-			fp+=1
-	for t in covG:
-		if t not in covR:
-			fn+=1
-	#print('metrics: tp=' + str(tp) + ' fp=' + str(fp) + ' fn=' + str(fn))
-	return tp, fp, fn
-
 def run_batches(inputArray, threshold, batchsize=1, WM_size=sys.maxsize, ssResolver=None, verbose=False):
 	
 	def generate_batches(inputArray, batchsize):
@@ -83,13 +52,6 @@ def run_batches(inputArray, threshold, batchsize=1, WM_size=sys.maxsize, ssResol
 	ignore_value = sys.maxsize
 	end_timestamp = -1
 
-	if ssResolver != None and (ssResolver[0]==smoothing.HoltPrediction or ssResolver[0]==smoothing.forecast_by_bin):
-		ssResolver[1]['lt']= inputArray[1]+inputArray[0]-2*threshold #lt
-		ssResolver[1]['bt']= inputArray[1]-threshold#bt
-		ssResolver[1]['pmis']=[]
-		if verbose:
-			print('Model params: ' + str(ssResolver[1]))
-
 	for batch in batch_generator:
 
 		batch_intervals, support_set, prev_prefix, ignore_value, end_timestamp = oPIEC(batch, threshold=threshold, start_timestamp=end_timestamp+1, ignore_value=ignore_value, 
@@ -102,9 +64,6 @@ def run_batches(inputArray, threshold, batchsize=1, WM_size=sys.maxsize, ssResol
 			prob=inter[1]
 			resultTree.remove_envelop(start,end)
 			resultTree[start:end]=prob
-		
-		if ssResolver!=None and ssResolver[0]==smoothing.HoltPrediction:
-			ssResolver[1]['pmis']=stripIntervalTree(sorted(resultTree))
 
 	return stripIntervalTree(sorted(resultTree))
 
@@ -161,31 +120,6 @@ def oPIEC(inputArray, threshold, start_timestamp=0, ignore_value=sys.maxsize, su
 		print("Prefix: " + str(prefix))
 		print("Dp: " + str(dp))
 		print("Support Set: " + str(support_set))
-
-	##### Init Holts Prediction (if employed) #####
-	if ssResolver is not None and (ssResolver[0]==smoothing.HoltPrediction or ssResolver[0]==smoothing.forecast_by_bin):
-		#resolverParams=ssResolver[1][:4] #Unpack parameters and durations list
-		alpha=ssResolver[1]['alpha']
-		beta=ssResolver[1]['beta']
-		lt=ssResolver[1]['lt']
-		bt=ssResolver[1]['bt']
-		durations=ssResolver[1]['durations']
-		pmis=ssResolver[1]['pmis']
-		for i in range(0, len(inputArray)):
-			t = i + start_timestamp
-			lt=ssResolver[1]['lt']
-			bt=ssResolver[1]['bt']
-			if bt>=0:
-				phi = smoothing.phi_one(lt, bt)
-			else:
-				phi = smoothing.phi_zero(lt, bt)
-			if t>1:
-				ssResolver[1]['lt'], ssResolver[1]['bt'] = smoothing.update_holts(prefix[i], lt, bt, 
-					alpha, beta, phi)
-				if verbose:
-					print('Updated model: ' + str(ssResolver[1]))
-		if ssResolver[0]==smoothing.HoltPrediction:
-			rescaledDurations=smoothing.rescale_frequencies(durations.copy(), pmis, end_timestamp, verbose=verbose)
 
 	##### Compute PMIs starting from support set or current batch #####
 	ssIndex=0
@@ -269,28 +203,10 @@ def oPIEC(inputArray, threshold, start_timestamp=0, ignore_value=sys.maxsize, su
 			if ssResolver[0]==smallestRanges:
 				support_set = ssResolver[0](support_set, new_entries, verbose=verbose)
 
-			#elif ssResolver[0]==smoothing.HoltPrediction:
-			#	support_set = ssResolver[0](support_set, new_entries, prefix[-1], threshold, 
-			#		[ssResolver[1]['alpha'], ssResolver[1]['beta'], ssResolver[1]['lt'], ssResolver[1]['bt']],
-			#		phi, rescaledDurations, verbose=True)
-
-			elif ssResolver[0]==smoothing.forecast_by_bin:
-				support_set = ssResolver[0](support_set, new_entries, 
-					[ssResolver[1]['alpha'], ssResolver[1]['beta'], ssResolver[1]['lt'], ssResolver[1]['bt']],
-					ssResolver[1]['durations'], ssResolver[1]['pmis'], prefix[-1], threshold, end_timestamp,
-					phi, verbose=verbose)
 			elif ssResolver[0]==smoothing.durationLikelihood:
 				support_set = ssResolver[0](support_set, new_entries, ssResolver[1], prefix[-1], threshold, end_timestamp, verbose=verbose)
 
-			#def forecast_by_bin(support_set, new_entries, ResolverParams, durations, pmis, prefix, threshold, now, phi, verbose=False)
-
-			'''elif ssResolver[0]==MarkovLearn.markovResolver:
-				if len(inputArray)==1:
-					support_set = ssResolver[0](support_set, new_entries, inputArray[-1], prefix[-1]-prev_prefix +threshold, threshold, end_timestamp, ssResolver[1], verbose=verbose)
-				else:
-					support_set = ssResolver[0](support_set, new_entries, inputArray[-1], inputArray[-2], threshold, end_timestamp, ssResolver[1], verbose=verbose)
-
-			elif ssResolver[0]==ssrandomResolver:
+			'''elif ssResolver[0]==ssrandomResolver:
 				support_set = ssResolver[0](support_set, new_entries, verbose=verbose) 
 
 			elif ssResolver[0]==noResolver:
@@ -303,27 +219,28 @@ def oPIEC(inputArray, threshold, start_timestamp=0, ignore_value=sys.maxsize, su
 
 	return result, support_set, prev_prefix, ignore_value, end_timestamp 
 
-def runoPIEC(fileName, threshold=0.9, batchsize=1000, WM_size=100, ssResolver=(smallestRanges, None)):
-	baseFolder = '../../Prob-EC_output/PIEC_input/'
+def runoPIEC(fileName, threshold=0.9, batchsize=1000, WM_size=2, ssResolver=(smallestRanges, None)):
+	baseFolder = '../../Prob-EC_output/recognition/'
 	writeFolder = '../../oPIEC_output/'
 	inputFiles = [f.path for f in os.scandir(baseFolder) if (fileName in f.name)]
 	for filePath in inputFiles:
-		f=open(filePath, 'r')
-		inputArray=list()
-		for line in f:
-			inputArray.append(float(line.strip()))
-		f.close()
-		oPIECresult = run_batches(inputArray, threshold, WM_size=WM_size, batchsize=batchsize, ssResolver=ssResolver, verbose=False)
-		PMIs = list(map(lambda x:x[0], oPIECresult))
-		PMIprobabilities = list(map(lambda x: x[1], oPIECresult))
-		CrediblePMIs = getCredible(PMIs, PMIprobabilities)
-		writePath= writeFolder + filePath.split('/')[-1].replace('input','result')
-		fw=open(writePath, 'w+')
-		fw.write(str(CrediblePMIs))
-		fw.close()
+		allInputs=get_input_and_fill(filePath)
+		for key in allInputs:
+			inputArray=allInputs[key]
+			if len(inputArray)>1: #if there is recognition for that specific fluent-value pair (e.g., meeting(id1,id2)=true).
+				oPIECresult = run_batches(inputArray, threshold, WM_size=WM_size, batchsize=batchsize, ssResolver=ssResolver, verbose=False)
+				PMIs = list(map(lambda x:x[0], oPIECresult))
+				PMIprobabilities = list(map(lambda x: x[1], oPIECresult))
+				CrediblePMIs = getCredible(PMIs, PMIprobabilities)
+				writePath= writeFolder + filePath.split('/')[-1].replace('input','result')
+				fw=open(writePath, 'w+')
+				fw.write(str(CrediblePMIs))
+				fw.close()
+				#print('Intervals for ' + key + ': ' + str(CrediblePMIs))
 	return 
 
 runoPIEC(sys.argv[1])
+#runoPIEC(sys.argv[1], 0.9, 1000, 100, (smoothing.durationLikelihood, smoothing.fix_durations([2000, 3000, 3500, 4000],2)))
 
 #resolver1=(smallestRanges, None)
 #myDurations=[(2,4),(7,13)] 

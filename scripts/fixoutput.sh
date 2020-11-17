@@ -19,7 +19,6 @@ LastIndex=$((${#events[@]}-1))
 
 for i in $(seq 0 ${LastIndex}) #${0..${LastIndex}}
 do
-	sed  '/'${events[$i]}\([^\)]*\)\=${values[$i]}'/!d' ${fileName}.result > ../recognition/${fileName}_${events[$i]}_${values[$i]}.pl &&
-	python${pythonVersion} ../../scripts/pythonScripts/getPIECinput.py ${fileName}_${events[$i]}_${values[$i]}
-done
+	sed  '/'${events[$i]}\([^\)]*\)\=${values[$i]}'/!d' ${fileName}.result > ../recognition/${fileName}_${events[$i]}_${values[$i]}.pl
+done &&
 cd ../../scripts 

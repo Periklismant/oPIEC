@@ -1,25 +1,22 @@
 :- use_module(library(assert)).
 :- use_module(library(cut)).
-:- use_module(library(string)).
-%:- use_module(library(problog_imports)).
 :- use_module(library(lists)).
 
-:-	debugprint("Getting simple events..."),
-	cmd_args(Args),
-	Args = [FileName|_],
-	%PathPrefix = "../intermediateFiles/ProbECinput/",
-	%subquery(concat_strings([PathPrefix, FileName], PathName), P),
-	%P > 0,
-	PathName=FileName,
+:-	debugprint("Starting `Prob-EC' for Maritime Monitoring..."), 
+	cmd_args(Args), % Args = [InputFileName, Fluent1, Fluent2, ..., FluentM].
+	Args = [PathName|_], % Prob-EC will detect the specified fluents AND all their constituents
 	[PathName],
-	debugprint("Getting compare"), ['auxiliary/compare'],
-	debugprint("Getting vStatic"), ['auxiliary/vesselStaticInfo'],
-	debugprint("Getting staticD"), ['auxiliary/staticDataPredicates'],
-	debugprint("Getting typeSpeeds"), ['auxiliary/typeSpeeds'],
-	debugprint("Getting thresholds"), ['auxiliary/thresholds'],
-	debugprint("Getting definitions"), ['event_description/prob_event_defs_maritime_cached'],
-	debugprint("Getting inertia"), ['prob_ec_cached.pl'],
-	debugprint("Getting initially"), ['event_description/prob_initially.pl'],
-	debugprint("Getting hierarchy"), ['event_description/hierarchy.pl'],
-	debugprint("Getting utilities"), ['prob_utils_cached'],
-	debugprint("Starting..."), performFullER.
+	debugprint("Input parsed.")
+	['auxiliary/compare'],
+	['auxiliary/vesselStaticInfo'],
+	['auxiliary/staticDataPredicates'],
+	['auxiliary/typeSpeeds'],
+	['auxiliary/thresholds'],
+	['event_description/prob_event_defs_maritime_cached'],
+	['prob_ec_cached.pl'],
+	['event_description/prob_initially.pl'],
+	['event_description/hierarchy.pl'],
+	debugprint("Event Description parsed.")
+	['prob_utils_cached'],
+	debugprint("Event Recognition begins...")
+	performFullER.
