@@ -1,0 +1,9 @@
+For the use case of maritime monotoring, Prob-EC and oPIEC have been tested on the publicly available Brest dataset which can be downloaded from here: https://owncloud.skel.iit.demokritos.gr/index.php/s/EKJtSdvpTGCfKm1 (NOTE: this is the original, crisp version.)
+
+This dataset contains 18M position signals from 5K vessels sailing in the Atlantic Ocean around the port of Brest, France, between October 1st 2015 and 31st March 2016. Additionally, a spatial preprocessing module produced 374K spatio-temporal events linking vessels with, among others, 263 fishing areas and 1.2K Natura 2000 areas, as well as vessels with other vessels. Also, a trajectory synopsis generator labelled 4.6M position signals as critical. However, there is no uncertainty present in the dataset and it cannot be used directly by Prob-EC. 
+
+For that reason, we have injected artificial noise to the simple events of the Brest Dataset. Every input indication, including the spatial and critical events, is assigned a probability value which is inversely proportional to the distance of the respictive vessel from the nearest coast. This method assumes that signals become less reliable the further a vessel is from any signal receiver. Also, we have gaussian white noise on top of these values to make the recognition task more rigorous.
+
+Finally, another preprocessing step adds information which is used to accelarate the recognition of Prob-EC, e.g. a fact which indicate that two vessels are (or will be) close to each other.
+
+A portion of the noisy Brest dataset can be found in the /inputDatasets/examples/ folder ('maritime.pl' and 'maritime_short.pl'). A probabilistic version of the full dataset will be available in the future. These examples may be executed via /scripts/run_maritime.sh. You may change the input file and the parameters of the experiments through the declarations in the code of the script.
