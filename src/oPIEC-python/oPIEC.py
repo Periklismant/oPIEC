@@ -5,43 +5,57 @@ from utils import stripIntervalTree,get_input_and_fill
 from ssResolver import *
 from intervaltree import Interval, IntervalTree
 
-def getCredible(tuples, probabilities):
-	'''Tuples is a list of intervals and probabilities is a list of floats (probability values) which indicate the probability of each interval in ${tuples}.
+def getCredible(intervalsAndProbs):
+	'''Input list is in the form: [((Tstart1, Tend1), Prob1),((Tstart2, Tend2), Prob2), ...].
+	   The first element of each tuple is an interval (starting point, ending point) and the second is its probability.
 	   The credility of an interval is measured as: length*probability.
 	   getCredible find the most credible interval within a region of overlapping intervals.
-	   The return value is a list of non-overlapping intervals constructed from the initial tuples.
+	   The return value is a list of non-overlapping intervals constructed from the input list.
 	   '''
-	if not tuples:
+	if not intervalsAndProbs:
 		return []
+	intervals = list(map(lambda x:x[0], intervalsAndProbs))
+	probabilities = list(map(lambda x: x[1], intervalsAndProbs))
 
-	if len(tuples) == 1:
-		return tuples
+	if len(intervals) == 1:
+		return intervals
 
-	overlap = list()
+	nonOverlap = list()
 	tmp = 0
-	currentValue = tuples[0][1]
-	currentInterval = tuples[0]
-	max_cred = (tuples[0][1] - tuples[0][0])*probabilities[0]
+	currentValue = intervals[0][1]
+	currentInterval = intervals[0]
+	max_cred = (intervals[0][1] - intervals[0][0])*probabilities[0]
 	flag1 = True
 	
-	for i in range(1, len(tuples)):
-		if (tuples[i][0] < currentValue):
-			if ((tuples[i][1] - tuples[i][0])*probabilities[i] >= max_cred):
-				max_cred = (tuples[i][1] - tuples[i][0])*probabilities[i]
-				currentInterval = tuples[i]			
-			currentValue = tuples[i][1]
+	for i in range(1, len(intervals)):
+		if (intervals[i][0] < currentValue):
+			if ((intervals[i][1] - intervals[i][0])*probabilities[i] >= max_cred):
+				max_cred = (intervals[i][1] - intervals[i][0])*probabilities[i]
+				currentInterval = intervals[i]			
+			currentValue = intervals[i][1]
 		else:
-			overlap.append(currentInterval)
+			nonOverlap.append(currentInterval)
 			#print(currentInterval,max_cred)
-			currentInterval = tuples[i]
-			currentValue = tuples[i][1]
-			max_cred = (tuples[i][1] - tuples[i][0])*probabilities[i]
-	overlap.append(currentInterval)
-	return overlap
+			currentInterval = intervals[i]
+			currentValue = intervals[i][1]
+			max_cred = (intervals[i][1] - intervals[i][0])*probabilities[i]
+	nonOverlap.append(currentInterval)
+	return nonOverlap
 
 def run_batches(inputArray, threshold, batchsize=1, WM_size=sys.maxsize, ssResolver=None, verbose=False):
-	
+	'''
+	Seperates the input array in data batches and executes oPIEC for each batch, sequentially.
+	The support set, the set of computed intervals and the remaining auxilary data are being updated between executions of oPIEC.
+	inputArray <- List of probability values.
+	threshold <- Lower bound of accepted interval probability.
+	batchsize <- The length of each data batch.
+	WM_size <- The maximum number of elements in the support set.
+	ssResolver <- A tuple (funcName, helpData) where funcName is the name of the function employed for support set maintenance
+	              and helpData is a data structure with auxiliary information needed for ${funcName} (sometimes helpData is None).
+	verbose <- blah blah. 
+	'''
 	def generate_batches(inputArray, batchsize):
+		'''Create as many data batches with length of ${batchsize} as possible.'''
 		for i in range(0, len(inputArray), batchsize):
 			yield inputArray[i:i+batchsize]
 
@@ -53,7 +67,7 @@ def run_batches(inputArray, threshold, batchsize=1, WM_size=sys.maxsize, ssResol
 	end_timestamp = -1
 
 	for batch in batch_generator:
-
+		# Execute oPIEC and update information.
 		batch_intervals, support_set, prev_prefix, ignore_value, end_timestamp = oPIEC(batch, threshold=threshold, start_timestamp=end_timestamp+1, ignore_value=ignore_value, 
 			support_set=support_set, prev_prefix=prev_prefix, WM_size=WM_size, ssResolver=ssResolver, verbose=verbose)
 		if verbose:
@@ -117,11 +131,9 @@ def oPIEC(inputArray, threshold, start_timestamp=0, ignore_value=sys.maxsize, su
 		dp[i] = max(dp[i+1], prefix[i])
 
 	if verbose:
-		print("Prefix: " + str(prefix))
-		print("Dp: " + str(dp))
-		print("Support Set: " + str(support_set))
+		print("\tSupport Set: " + str(support_set))
 
-	##### Compute PMIs starting from support set or current batch #####
+	##### Compute PMIs starting from the support set or the current batch #####
 	ssIndex=0
 	ssLength=len(support_set)
 	start = start_timestamp
@@ -131,52 +143,35 @@ def oPIEC(inputArray, threshold, start_timestamp=0, ignore_value=sys.maxsize, su
 
 	while start<=end_timestamp and end<=end_timestamp:
 		if ssIndex<=ssLength-1:
-			if verbose:
-				print("\tIn Support Set.")
-				print("\tSs element: " + str(support_set[ssIndex]))
-				print("\tBatch end element: " + str(dp[end-start_timestamp]))
 			dprange = round(dp[end-start_timestamp],6) - round(support_set[ssIndex][1],6)
-			if verbose:
-				print("\tdprange: " + str(dprange))
 			if round(dprange,6)>=0:
 				flag=True
 				end+=1
 			elif round(dprange,6)<0:
 				if flag:
 					addIntervalSS(support_set[ssIndex], end-1-start_timestamp)
-					if verbose:
-						print("\tInterval Found!")
 				flag=False
 				ssIndex+=1
 		else:
-			if verbose:
-				print("\tIn Data Batch.")
-				print("\tBatch start element: " + str(dp[start-start_timestamp]))
-				print("\tBatch end element: " + str(dp[end-start_timestamp]))
 			if(start == start_timestamp):
 				dprange = round(dp[end - start_timestamp],6) - round(prev_prefix,6)
 			else:
 				dprange = round(dp[end - start_timestamp],6) - round(prefix[start - 1 - start_timestamp],6)
-			if verbose:
-				print("\tdprange: " + str(dprange))
 			if(round(dprange,6) >= 0):
 				flag = True
 				end += 1
 			else:
 				if (start < end and flag):
 					addIntervalBatch(start, end-1)
-					if verbose:
-						print("\tInterval Found!")
 				flag = False		
 				start += 1
 	if flag == True and ssIndex < len(support_set):
 		addIntervalSS(support_set[ssIndex], end-1-start_timestamp)
-		if verbose:
-			print("\tInterval Found at end!")
 	elif flag==True:
 		addIntervalBatch(start, end-1)
-		if verbose:
-			print("\tInterval Found at end!")
+
+	if verbose:
+		print("\tNew PMIs: " + str(result))
 
 	##### Update support set #####
 	if WM_size > 0:
@@ -198,8 +193,7 @@ def oPIEC(inputArray, threshold, start_timestamp=0, ignore_value=sys.maxsize, su
 				ignore_value = scores[i][1]
 		if len(new_entries) > 0:
 			if verbose:
-				print('ss before: ' + str(support_set))
-				print('new entries: ' + str(new_entries))
+				print('\tNew support set entries: ' + str(new_entries))
 			if ssResolver[0]==smallestRanges:
 				support_set = ssResolver[0](support_set, new_entries, verbose=verbose)
 
@@ -213,13 +207,16 @@ def oPIEC(inputArray, threshold, start_timestamp=0, ignore_value=sys.maxsize, su
 				support_set = ssResolver[0](support_set, new_entries)'''
 
 			if verbose:
-				print('ss after: ' + str(support_set))
+				print('\tNew support set: ' + str(support_set))
 
 	prev_prefix = prefix[-1]
 
 	return result, support_set, prev_prefix, ignore_value, end_timestamp 
 
 def runoPIEC(fileName, threshold=0.9, batchsize=1000, WM_size=2, ssResolver=(smallestRanges, None)):
+	'''Reads the recognition of Prob-EC from the file specified by the user.
+	   Executes oPIEC for the given parameters and write the output to a file.'''
+	print("Starting `oPIEC' for " + fileName + "...")
 	baseFolder = '../../Prob-EC_output/recognition/'
 	writeFolder = '../../oPIEC_output/'
 	inputFiles = [f.path for f in os.scandir(baseFolder) if (fileName in f.name)]
@@ -229,25 +226,30 @@ def runoPIEC(fileName, threshold=0.9, batchsize=1000, WM_size=2, ssResolver=(sma
 			inputArray=allInputs[key]
 			if len(inputArray)>1: #if there is recognition for that specific fluent-value pair (e.g., meeting(id1,id2)=true).
 				oPIECresult = run_batches(inputArray, threshold, WM_size=WM_size, batchsize=batchsize, ssResolver=ssResolver, verbose=False)
-				PMIs = list(map(lambda x:x[0], oPIECresult))
-				PMIprobabilities = list(map(lambda x: x[1], oPIECresult))
-				CrediblePMIs = getCredible(PMIs, PMIprobabilities)
-				writePath= writeFolder + filePath.split('/')[-1].replace('input','result')
+				CrediblePMIs = getCredible(oPIECresult)
+				writePath= writeFolder + filePath.split('/')[-1].replace('pl','result')
 				fw=open(writePath, 'w+')
-				fw.write(str(CrediblePMIs))
+				fw.write(key + ' : ' + str(CrediblePMIs) + '\n')
 				fw.close()
-				#print('Intervals for ' + key + ': ' + str(CrediblePMIs))
+	print("Done.")
 	return 
 
-runoPIEC(sys.argv[1])
-#runoPIEC(sys.argv[1], 0.9, 1000, 100, (smoothing.durationLikelihood, smoothing.fix_durations([2000, 3000, 3500, 4000],2)))
+## Testing with Prob-EC output ## 
+# Adjust input parameters HERE #
+threshold=0.9
+batchsize=1000
+WM_size=2
+ssResolver=(smallestRanges, None)
+#ssResolver=(smoothing.durationLikelihood, smoothing.fix_durations([2000, 3000, 3500, 4000],WM_size))
 
+runoPIEC(sys.argv[1], threshold, batchsize, WM_size, ssResolver)
+
+## Unit Tests ##
 #resolver1=(smallestRanges, None)
 #myDurations=[(2,4),(7,13)] 
 #resolver2=(smoothing.durationLikelihood, myDurations)
 #print(run_batches([0, 0.5, 0.7, 0.9, 0.4, 0.1, 0, 0, 0.5, 1], 0.5, batchsize=2, WM_size=2, ssResolver=resolver1, verbose=True))
 #print(run_batches([0, 0.5, 0.7, 0.9, 0.4, 0.1, 0, 0, 0.5, 1], 0.5, batchsize=2, WM_size=2, ssResolver=resolver2, verbose=True))
-
 #print(run_batches([0,0,0,0,0,0,0.2,0.6,0.8,0.9,1,1,0.8,0.6,0.34,0.1,0.1,0.5,0.66,0.9,1,1,1,1,0.8,0.8,0.7,0.2,0,0,0,0,0,0,0,0,0],0.7, 2, WM_size=8))#ssResolver=(smoothing.HoltPrediction, [0.6, 0.6]),verbose=True, durerror=(18, 7)))
 #print(run_batches([0, 0, 0.6, 0.83, 0.92, 0.01, 0.01, 0.7, 0.82, 0.92],0.6, 2))
 

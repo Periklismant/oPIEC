@@ -3,7 +3,7 @@
  * meeting(Person1, Person2)					  *
 ,* fighting(Person1, Person2)					  *
  * moving(Person1, Person2)					  *
- * leaving-object(Person1, Person2)				  *		  			  *								  *
+ * leaving-object(Person1, Person2)				  *	
  *								  *
  * SHORT-TERM BEHAVIOURS					  *
  * walking, active, inactive, running
@@ -62,7 +62,7 @@ holdsAt(close(Person1, Person2, Threshold) = false, T) :-
 holdsAt( distance(Person1, Person2) = Ypot, T ) :-
 	holdsAt( coord(Person1) = (X1, Y1), T ),
 	holdsAt( coord(Person2) = (X2, Y2), T ),
-	\+ Person1 = Person2, %TODO: Check if you need to comment this line
+	\+ Person1 = Person2,
 	XDiff is abs(X1-X2),
 	YDiff is abs(Y1-Y2),
 	SideA is XDiff*XDiff,
@@ -297,9 +297,3 @@ happensAt(appear(ID), T):-
 
 happensAt(disappear(ID), T):-
 	holdsAt(appearance(ID) = disappear, T).
-
-% Probabilistic negation
-
-%negate(SDE):- problog_not(SDE). % TODO: Check if you need to add a cut.
-
-%negate(SDE):- \+ SDE.
