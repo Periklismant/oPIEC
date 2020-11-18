@@ -222,13 +222,16 @@ def runoPIEC(fileName, threshold=0.9, batchsize=1000, WM_size=2, ssResolver=(sma
 	inputFiles = [f.path for f in os.scandir(baseFolder) if (fileName in f.name)]
 	for filePath in inputFiles:
 		allInputs=get_input_and_fill(filePath)
+		writePath= writeFolder + filePath.split('/')[-1].replace('pl','result')
+		fw=open(writePath, 'w') #Create file and delete the older version (if it exists). 
+		fw.close()
 		for key in allInputs:
 			inputArray=allInputs[key]
 			if len(inputArray)>1: #if there is recognition for that specific fluent-value pair (e.g., meeting(id1,id2)=true).
 				oPIECresult = run_batches(inputArray, threshold, WM_size=WM_size, batchsize=batchsize, ssResolver=ssResolver, verbose=False)
 				CrediblePMIs = getCredible(oPIECresult)
 				writePath= writeFolder + filePath.split('/')[-1].replace('pl','result')
-				fw=open(writePath, 'w+')
+				fw=open(writePath, 'a')
 				fw.write(key + ' : ' + str(CrediblePMIs) + '\n')
 				fw.close()
 	print("Done.")

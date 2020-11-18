@@ -13,11 +13,11 @@ performFullER:-
   Timepoints=[FirstTimepoint|_Rest],
   cmd_args(Args),
   Args = [_FileName|InputEvents], % Get target fluents from argvs.
-  %debugprint("Input Events: "),
-  %debugprint(InputEvents),
+  debugprint("Input Events: "),
+  debugprint(InputEvents),
   findDependencies(InputEvents, Events), % Get all the events that must be computed according to the event hierarchy. 
-  %debugprint("Required Events: "),
-  %debugprint(Events),
+  debugprint("Required Events: "),
+  debugprint(Events),
   getInitially(Events, FirstTimepoint), % Assert the initial values of fluents.
   allVessels(Vessels), % Get all the vessels of the input dataset.
   allVesselTuples(Tuples), % Get all the vessels that `meet' as tuples.

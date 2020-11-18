@@ -1,17 +1,12 @@
 #!/bin/bash
-
-#events=("meeting" "moving")
-#values=("true" "true")
-#fileName="Walk1-smooth-1.0"
-#events=("loitering")
-#values=("true")
-#fileName="loitering_test"
-#pythonVersion="3.8"
+#Reads the recognition of Prob-EC (in /Prob-EC_output/preprocessed/), separates it by fluent and writes the recognition of each fluent in a new separate files (in /Prob-EC_output/recognition/). 
 
 IFS=',' read -r -a events <<< "$1"
 IFS=',' read -r -a values <<< "$2"
 fileName="$3"
 pythonVersion="$4"
+echo $1 
+echo $2
 
 cd ../Prob-EC_output/preprocessed &&
 sed -i 's/"//g; s/ //g' ${fileName}.result &&

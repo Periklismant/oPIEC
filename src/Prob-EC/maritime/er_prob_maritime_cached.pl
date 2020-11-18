@@ -6,7 +6,7 @@
 	cmd_args(Args), % Args = [InputFileName, Fluent1, Fluent2, ..., FluentM].
 	Args = [PathName|_], % Prob-EC will detect the specified fluents AND all their constituents
 	[PathName],
-	debugprint("Input parsed.")
+	debugprint("Input parsed."),
 	['auxiliary/compare'],
 	['auxiliary/vesselStaticInfo'],
 	['auxiliary/staticDataPredicates'],
@@ -16,7 +16,7 @@
 	['prob_ec_cached.pl'],
 	['event_description/prob_initially.pl'],
 	['event_description/hierarchy.pl'],
-	debugprint("Event Description parsed.")
+	debugprint("Event Description parsed."),
 	['prob_utils_cached'],
-	debugprint("Event Recognition begins...")
+	debugprint("Event Recognition begins..."),
 	performFullER.

@@ -1,4 +1,5 @@
-%Initially
+% Initial probability values of all fluents are set to 0.
+% However the user is free to adjust them from the following probabilistic facts.
 0::cached(holdsAt(withinArea(_Vessel,anchorage)=true)).
 0::cached(holdsAt(withinArea(_Vessel,nearCoast)=true)).
 0::cached(holdsAt(withinArea(_Vessel,nearCoast5k)=true)).

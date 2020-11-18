@@ -6,8 +6,10 @@ isArea(natura).
 isArea(fishing).
 isArea(nearPorts).
 
+
 areaType(Area, Area).
 
+% Change if string library is fixed in ProbLog 2.
 %areaType(Area, AreaType):-
     %subquery(split_underscore(Area, AreaType), P), 
     %P > 0.

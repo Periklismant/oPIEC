@@ -1,4 +1,5 @@
-%Initially
+% Initial probability values of all fluents are set to 0.
+% However the user is free to adjust them from the following probabilistic facts.
 0::cached(holdsAt(meeting(_ID1,_ID2)=true)).
 0::cached(holdsAt(fighting(_ID1,_ID2)=true)).
 0::cached(holdsAt(moving(_ID1,_ID2)=true)).

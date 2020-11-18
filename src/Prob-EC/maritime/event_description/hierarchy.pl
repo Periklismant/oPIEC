@@ -1,7 +1,15 @@
 %------- Event Hierarchy -------%
+% Defining an event hierarchy allows Prob-EC to compute only the constituent fluents of the target fluents(which are given by the users).
+% This avoid unnecessary computations. E.g., tuggingSpeed should not be computed if the target fluent is loitering.
+
 % dependency(_ToBeComputedFirst, _Target).
 dependency(withinArea, gap).
 dependency(withinArea, highSpeedNearCoast).
+dependency(withinArea, stopped).
+dependency(withinArea, rendezVous).
+dependency(withinArea, anchoredOrMoored).
+dependency(withinArea, loitering).
+
 
 dependency(gap, stopped).
 dependency(gap, lowSpeed).
@@ -14,6 +22,7 @@ dependency(stopped, pilotBoarding).
 
 dependency(lowSpeed, rendezVous).
 dependency(lowSpeed, pilotBoarding).
+dependency(lowSpeed, loitering).
 
 dependency(tuggingSpeed, tugging).
 
