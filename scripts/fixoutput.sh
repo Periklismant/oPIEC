@@ -5,8 +5,6 @@ IFS=',' read -r -a events <<< "$1"
 IFS=',' read -r -a values <<< "$2"
 fileName="$3"
 pythonVersion="$4"
-echo $1 
-echo $2
 
 cd ../Prob-EC_output/preprocessed &&
 sed -i 's/"//g; s/ //g' ${fileName}.result &&

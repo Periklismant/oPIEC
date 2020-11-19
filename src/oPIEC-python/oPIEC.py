@@ -1,7 +1,6 @@
 import sys
-import smoothing
 import os
-from utils import stripIntervalTree,get_input_and_fill
+from utils import stripIntervalTree,get_input_and_fill,tree_add_merge
 from ssResolver import *
 from intervaltree import Interval, IntervalTree
 
@@ -77,7 +76,8 @@ def run_batches(inputArray, threshold, batchsize=1, WM_size=sys.maxsize, ssResol
 			end=inter[0][1]+1 #Because they are right open
 			prob=inter[1]
 			resultTree.remove_envelop(start,end)
-			resultTree[start:end]=prob
+			tree_add_merge(resultTree, start, end, prob)
+			#resultTree[start:end]=prob
 
 	return stripIntervalTree(sorted(resultTree))
 
@@ -93,8 +93,6 @@ def oPIEC(inputArray, threshold, start_timestamp=0, ignore_value=sys.maxsize, su
 	WM_size <- maximum allowed support set size -- working memory limit.
 	ssResolver <- ssResolver[0] is the function used resolver support set size conflicts -- ssResolver[1] is list of parameters used by ssResolver[0].  
 	verbose <- blah blah blah if True
-	durations and pmis <- used by smoothing predictor -- TODO move these
-	
 	'''
 	result=list()
 	inputSize = len(inputArray)
@@ -197,7 +195,7 @@ def oPIEC(inputArray, threshold, start_timestamp=0, ignore_value=sys.maxsize, su
 			if ssResolver[0]==smallestRanges:
 				support_set = ssResolver[0](support_set, new_entries, verbose=verbose)
 
-			elif ssResolver[0]==smoothing.durationLikelihood:
+			elif ssResolver[0]==durationLikelihood:
 				support_set = ssResolver[0](support_set, new_entries, ssResolver[1], prefix[-1], threshold, end_timestamp, verbose=verbose)
 
 			'''elif ssResolver[0]==ssrandomResolver:
@@ -238,21 +236,38 @@ def runoPIEC(fileName, threshold=0.9, batchsize=1000, WM_size=2, ssResolver=(sma
 	return 
 
 ## Testing with Prob-EC output ## 
-# Adjust input parameters HERE #
-threshold=0.9
-batchsize=1000
-WM_size=2
+## Adjust input parameters HERE #
+
+# General parameters #
+
+threshold=0.9 # Minimum accepted interval probability.
+batchsize=1000 # Number of elements of each data batch.
+WM_size=2 # Maximum number of elements in the support set.
+
+# Support set maintenance strategies #
+
+# Unbiased strategy: delete the elements of the support set which are least unlikely to 
+#                    starting point of intervals given all possible progressions of the input timeseries 
+#                    (of event probability values) is equally likely. 
+
 ssResolver=(smallestRanges, None)
-#ssResolver=(smoothing.durationLikelihood, smoothing.fix_durations([2000, 3000, 3500, 4000],WM_size))
+
+# Predictive strategy: delete the least likely starting point of the support set given prior knowledge
+#                      about the expected duration of the complex event. Add the duration values of past 
+#                      event occurrences in the durationsStatistics array and use the durationLikelihood
+#                      function (uncomment the two following lines).
+
+#durationStatistics = [2000, 3000, 3500, 4000]
+#ssResolver=(durationLikelihood, fix_durations(durationStatistics,WM_size))
 
 runoPIEC(sys.argv[1], threshold, batchsize, WM_size, ssResolver)
 
 ## Unit Tests ##
 #resolver1=(smallestRanges, None)
 #myDurations=[(2,4),(7,13)] 
-#resolver2=(smoothing.durationLikelihood, myDurations)
+#resolver2=(durationLikelihood, myDurations)
 #print(run_batches([0, 0.5, 0.7, 0.9, 0.4, 0.1, 0, 0, 0.5, 1], 0.5, batchsize=2, WM_size=2, ssResolver=resolver1, verbose=True))
 #print(run_batches([0, 0.5, 0.7, 0.9, 0.4, 0.1, 0, 0, 0.5, 1], 0.5, batchsize=2, WM_size=2, ssResolver=resolver2, verbose=True))
-#print(run_batches([0,0,0,0,0,0,0.2,0.6,0.8,0.9,1,1,0.8,0.6,0.34,0.1,0.1,0.5,0.66,0.9,1,1,1,1,0.8,0.8,0.7,0.2,0,0,0,0,0,0,0,0,0],0.7, 2, WM_size=8))#ssResolver=(smoothing.HoltPrediction, [0.6, 0.6]),verbose=True, durerror=(18, 7)))
+#print(run_batches([0,0,0,0,0,0,0.2,0.6,0.8,0.9,1,1,0.8,0.6,0.34,0.1,0.1,0.5,0.66,0.9,1,1,1,1,0.8,0.8,0.7,0.2,0,0,0,0,0,0,0,0,0],0.7, 2, WM_size=8))
 #print(run_batches([0, 0, 0.6, 0.83, 0.92, 0.01, 0.01, 0.7, 0.82, 0.92],0.6, 2))
 

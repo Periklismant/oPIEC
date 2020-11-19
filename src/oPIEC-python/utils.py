@@ -79,6 +79,22 @@ def stripIntervalTree(intervalList):
 		result.append(((iv.begin, iv.end), iv.data))
 	return result
 
+def tree_add_merge(resultTree, start, end, prob):
+	'''If there exists an interval in resultTree such that its ending point meets the starting point of the new interval, concatenate intervals.
+	   Else, just add new interval in resultTree.'''
+	tempSet = resultTree[start-1]
+	meetInterval=None
+	for inter in tempSet:
+		if inter.end==start:
+			meetInterval=inter
+	if meetInterval is None:
+		resultTree[start:end]=prob
+	else:
+		newProb=((meetInterval.end-meetInterval.begin)*meetInterval.data + (end-start)*prob)/(end-meetInterval.begin)
+		resultTree.remove(meetInterval)
+		resultTree[meetInterval.begin:end]=newProb
+	return
+
 def parsePMIlist(pmiString):
 	pmitimepoints = pmiString.strip(' ').replace(')','').replace('(','').replace('[','').replace(']','').split(',')
 	pmis = list()

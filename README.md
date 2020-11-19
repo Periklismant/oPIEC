@@ -9,7 +9,7 @@ Point-based probabilistic event recognition is achieved with Prob-EC. Afterwards
 - The intervaltree Python package (https://pypi.org/project/intervaltree/), which is needed for the current version of oPIEC.
 
 
-### Prob-EC and oPIEC code and use cases
+### File Description
 
 - The code for both systems can be found in the /src folder.
 - /inputDatasets/ contains three folders:
@@ -19,7 +19,7 @@ Point-based probabilistic event recognition is achieved with Prob-EC. Afterwards
 - /scripts/ contains executable scripts for running the example datasets. 
   The parameters of each script can be adjust for the desired experiment.
 
-#### Execution Steps
+#### Execution Scripts
 
 Running an example script, e.g. for maritime monitoring, executes the entire pipeline of systems, i.e. first runs Prob-EC and, then, oPIEC, using as input the output of Prob-EC. 
 - Prob-EC is executed by running a ProbLog2 program. The output of ProbLog2 is saved in the /Prob-EC_output/preprocessed/ folder. 
