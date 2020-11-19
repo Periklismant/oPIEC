@@ -10,8 +10,8 @@ Point-based probabilistic event recognition is achieved with Prob-EC. Afterwards
 
 #### Available Applications
 
-- Human Activity Recognition (CAVIAR dataset:http://groups.inf.ed.ac.uk/vision/CAVIAR/CAVIARDATA1/)
-- Maritime Monitoring (Brest dataset:https://zenodo.org/record/1167595)
+- Human Activity Recognition (CAVIAR dataset: http://groups.inf.ed.ac.uk/vision/CAVIAR/CAVIARDATA1/)
+- Maritime Monitoring (Brest dataset: https://zenodo.org/record/1167595)
 
 For download instructions, a brief description of the datasets and usage instructions, you may refer to the '.txt' files in the /inputDatasets/ folder of this repository.
 
