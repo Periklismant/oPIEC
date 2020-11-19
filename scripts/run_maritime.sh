@@ -24,7 +24,7 @@ for i in "${events[@]}"
 do
 	eventParam="${eventParam} -a $i"
 done &&
-problog ../src/Prob-EC/maritime/er_prob_maritime_cached.pl -a ${inputPath} ${eventParam} > ../Prob-EC_output/preprocessed/${fileName}.result && # runs Prob-EC.
+problog ../src/Prob-EC/maritime/er_prob_maritime_cached.pl -a ${inputPath} ${eventParam} > ../Prob-EC_output/raw/${fileName}.result && # runs Prob-EC.
 ./fixoutput.sh ${eventsString} ${valuesString} ${fileName} ${pythonVersion} && # Seperate events from Prob-EC output. Results in the 'Prob-EC_output/recognition/' folder. 
 cd ../src/oPIEC-python/ &&
 LastIndex=$((${#events[@]}-1)) &&

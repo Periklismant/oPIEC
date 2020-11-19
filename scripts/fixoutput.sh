@@ -6,12 +6,12 @@ IFS=',' read -r -a values <<< "$2"
 fileName="$3"
 pythonVersion="$4"
 
-cd ../Prob-EC_output/preprocessed &&
+cd ../Prob-EC_output/raw &&
 sed -i 's/"//g; s/ //g' ${fileName}.result &&
 LastIndex=$((${#events[@]}-1))
 
 for i in $(seq 0 ${LastIndex}) #${0..${LastIndex}}
 do
-	sed  '/'${events[$i]}\([^\)]*\)\=${values[$i]}'/!d' ${fileName}.result > ../recognition/${fileName}_${events[$i]}_${values[$i]}.pl
+	sed  '/'${events[$i]}\([^\)]*\)\=${values[$i]}'/!d' ${fileName}.result > ../preprocessed/${fileName}_${events[$i]}_${values[$i]}.pl
 done &&
 cd ../../scripts 
