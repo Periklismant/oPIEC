@@ -4,13 +4,12 @@ Complex Event Recognition (CER) systems process streams of ‘low-level’ or �
 
 Prob-EC performs probabilistic CER by computing the probability of every complex event at each time-point. Prob-EC extends the Event Calculus, a logic formalism for representing and reasoning about events and their effects, with the ability to handle uncertainty in the input stream using the probabilistic reasoning modules of ProbLog 2. As an example, in Figure 1, Prob-EC is employed in the case of human activity recognition. Equipped with the event description of the domain, Prob-EC processes a probabilistic stream of simple events, e.g. \`walking', which may refer to different persons, and computes the complex events, like`meeting', a relational event between multiple agents, that occur at each time-point, along with the probability of their occurrence. 
 
-The output of Prob-EC is a stream of complex event - probability pairs for various activities. oPIEC may process a stream of event probabilities and compute maximal temporal intervals during which the event takes place. As seen in Figure 1, the stream of high level events is separated into multiple complex event probability streams which are, subsequently, fed into a different instance of oPIEC. Each instance processes an input stream in data batches, while potential starting points of intervals are stored in a small, auxiliary memory which is managed by oPIEC. Additionally, a probabilistic threshold is used to exclude intervals with a low probability value. As an example, the last instance of oPIEC in Figure 1 does not compute any interval for the event as a result of low event probabilities in the input. 
+The output of Prob-EC is a stream of complex event - probability pairs for various activities. oPIEC may process a stream of event probabilities and compute maximal temporal intervals during which the event takes place. As seen in Figure 1, the stream of high level events is separated into multiple complex event probability streams which are, subsequently, fed into a different instance of oPIEC. Each instance processes an input stream in data batches, while potential starting points of intervals are stored in a small, auxiliary memory which is managed by oPIEC. Additionally, a probabilistic threshold is used to exclude intervals with a low probability value. As an example, the last instance of oPIEC in Figure 1 does not compute any interval for the event as a result of low event probabilities in the input
 
 <figure class="image">
-    <img src="figures/system-flow.png" width="800" alt="System Flow Diagram">
+    <img src="figures/system-flow.png" width="1000" alt="System Flow Diagram">
     <figcaption>Figure 1. System Flow Diagram</figcaption>
 </figure>
-
 
 Prob-EC and oPIEC may work as two separate systems. However, we use a pipeline of Prob-EC and oPIEC because it has been observed that oPIEC alleviates the uncertainty in the output of Prob-EC, leading to more robust recognition. This approach has been tested on human activity recognition and maritime monitoring applications.  
 
@@ -27,17 +26,7 @@ Prob-EC and oPIEC may work as two separate systems. However, we use a pipeline o
 
 For download instructions, a brief description of the datasets and usage instructions, you may refer to the '.txt' files in the /inputDatasets/ folder.
 
-### File Description
-
-- The /src folder contains the source code of Prob-EC and oPIEC. There are currently two versions of Prob-EC which use a different event description to accommodate both human activity recognition and maritime monitoring. A user may define a custom event description, using the available examples as a template, to employ Prob-EC in a different domain. Currently, there is one version of oPIEC written in Python, while a Scala version will be available in the future. There is no need to modify the code of oPIEC by use case. However, the parameters of oPIEC (e.g. probabilistic threshold, working memory size, etc) should be adjusted depending on the application. 
-- /inputDatasets contains:
-	- the 'examples' folder which includes selected parts of the datasets for testing Prob-EC and oPIEC right away.
-	- Two '.txt' files with instructions for downloading and using the full datasets.
-- /scripts contains executable scripts for running the example datasets.
-- /Prob-EC_output contains the output of Prob-EC in the format before ('raw' subfolder) and after ('preprocessed' subfolder) a preprocessing step.
-- /oPIEC_output contains the final output of oPIEC. There is a separate file for each fluent-value pair. 
-
-#### Execution Scripts
+### Execution Scripts
 
 The current version of this repository contains scripts for running the pipeline of Prob-EC and oPIEC on datasets for human activity recognition and maritime monitoring.
 
@@ -56,6 +45,16 @@ The last two commands execute the example scripts for maritime monitoring and hu
 - Finally, oPIEC is executed for each of the generated files. The final output, produced by oPIEC, is stored in the /oPIEC_output folder and denotes the maximal intervals during which the event takes place.
 
 The parameters of each script can be adjust for the desired experiment via the declarations at the top of the script's code. You may refer to the comments in the script files for more usage instructions.
+
+### File Description
+
+- The /src folder contains the source code of Prob-EC and oPIEC. There are currently two versions of Prob-EC which use a different event description to accommodate both human activity recognition and maritime monitoring. A user may define a custom event description, using the available examples as a template, to employ Prob-EC in a different domain. Currently, there is one version of oPIEC written in Python, while a Scala version will be available in the future. There is no need to modify the code of oPIEC by use case. However, the parameters of oPIEC (e.g. probabilistic threshold, working memory size, etc) should be adjusted depending on the application. 
+- /inputDatasets contains:
+	- the 'examples' folder which includes selected parts of the datasets for testing Prob-EC and oPIEC right away.
+	- Two '.txt' files with instructions for downloading and using the full datasets.
+- /scripts contains executable scripts for running the example datasets.
+- /Prob-EC_output contains the output of Prob-EC in the format before ('raw' subfolder) and after ('preprocessed' subfolder) a preprocessing step.
+- /oPIEC_output contains the final output of oPIEC. There is a separate file for each fluent-value pair. 
 
 ### Documentation
 
