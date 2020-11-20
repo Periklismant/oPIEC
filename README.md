@@ -2,7 +2,7 @@
 
 Point-based probabilistic event recognition is achieved with Prob-EC. Afterwards, oPIEC processes the output of Prob-EC to construct the maximal temporal intervals of each complex event. 
 
-![System Flow Diagram](system-flow.pdf)
+![System Flow Diagram](figures/system-flow.png)
 
 ### Requirements
 
