@@ -26,7 +26,7 @@ Prob-EC and oPIEC may work as two separate systems. However, we use a pipeline o
 
 For download instructions, a brief description of the datasets and usage instructions, you may refer to the '.txt' files in the /inputDatasets/ folder.
 
-### Execution Scripts
+### Execution Instructions
 
 The current version of this repository contains scripts for running the pipeline of Prob-EC and oPIEC on datasets for human activity recognition and maritime monitoring.
 
