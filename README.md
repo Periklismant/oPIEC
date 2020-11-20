@@ -1,8 +1,17 @@
 ## Probabilistic Complex Event Recognition
 
-Point-based probabilistic event recognition is achieved with Prob-EC. Afterwards, oPIEC processes the output of Prob-EC to construct the maximal temporal intervals of each complex event. 
+Complex Event Recognition (CER) systems process streams of ‘low-level’ or ‘simple' events, derived from sensor data, and infer 'high-level' or 'composite' activities by means of pattern matching. These patterns combine simple and composite event occurrences with spatio-temporal constraints. Uncertainty is inherent in many CER applications. An input stream may contain low-level events expressed as Pr::LLE, where Pr corresponds to the probability value of the LLE which serves as its confidence estimate. A probabilistic event recognition system consumes such streams and derives a collection of complex events with attached probability values. 
 
-![System Flow Diagram](figures/system-flow.png)
+Prob-EC performs probabilistic CER by computing the probability of every complex event at each time-point. Prob-EC extends the Event Calculus, a logic formalism for representing and reasoning about events and their effects, with the ability to handle uncertainty in the input stream using the probabilistic reasoning modules of ProbLog 2. As an example, in Figure 1, Prob-EC is employed in the case of human activity recognition. Equipped with the event description of the domain, Prob-EC processes a probabilistic stream of simple events, e.g. \`walking', which may refer to different persons, and computes the complex events, like`meeting', a relational event between multiple agents, that occur at each time-point, along with the probability of their occurrence. 
+
+The output of Prob-EC is a stream of complex event - probability pairs for various activities. oPIEC may process a stream of event probabilities and compute maximal temporal intervals during which the event takes place. As seen in Figure 1, the stream of high level events is separated into multiple complex event probability streams which are, subsequently, fed into a different instance of oPIEC. Each instance processes an input stream in data batches, while potential starting points of intervals are stored in a small, auxiliary memory which is managed by oPIEC. Additionally, a probabilistic threshold is used to exclude intervals with a low probability value. As an example, the last instance of oPIEC in Figure 1 does not compute any interval for the event as a result of low event probabilities in the input. 
+
+<figure class="image">
+    <img src="figures/system-flow.png" width="800" alt="System Flow Diagram">
+    <figcaption>Figure 1. System Flow Diagram</figcaption>
+</figure>
+
+Prob-EC and oPIEC may work as two separate systems. However, we use a pipeline of the two systems because it has been observed that oPIEC alleviates the uncertainty in the output of Prob-EC, leading to more robust recognition. This approach has been tested on human activity recognition and maritime monitoring applications.  
 
 ### Requirements
 
@@ -10,7 +19,7 @@ Point-based probabilistic event recognition is achieved with Prob-EC. Afterwards
 - ProbLog 2 (https://problog.readthedocs.io/en/latest/install.html), which is mandatory for Prob-EC.
 - The intervaltree Python 3 package (https://pypi.org/project/intervaltree/), which is needed for the current version of oPIEC.
 
-#### Available Applications
+### Available Applications
 
 - Human Activity Recognition (CAVIAR dataset: http://groups.inf.ed.ac.uk/vision/CAVIAR/CAVIARDATA1/)
 - Maritime Monitoring (Brest dataset: https://zenodo.org/record/1167595)
@@ -31,12 +40,23 @@ For download instructions, a brief description of the datasets and usage instruc
 
 The current version of this repository contains scripts for running the pipeline of Prob-EC and oPIEC on datasets for human activity recognition and maritime monitoring.
 
-Running an example script, e.g. for maritime monitoring, executes the entire pipeline of systems, i.e. first runs Prob-EC and then oPIEC, using as input the output of Prob-EC. 
-- Prob-EC is executed by running a ProbLog2 program. The output of ProbLog2 is saved in the /Prob-EC_output/raw folder. 
-- Afterwards, the script transforms the output of Prob-EC by isolating the probabilities computed for each event. As a result, the recognition of Prob-EC for each complex event is present in the /Prob-EC_output/preprocessed folder. This format is compatible with oPIEC. 
-- Finally, the script executes oPIEC for each of the generated files. The final output, produced by oPIEC, is stored in the /oPIEC_output folder and denotes the maximal intervals during which the event takes place.
+After downloading the repository, you may execute the example scripts as follows:
 
-The parameters of each script can be adjust for the desired experiment via the declarations at the top of the script's code. You may refer to the comments in the script files for usage intructions.
+1. ```  cd ./scripts ```
+
+2. ``` ./run_caviar.sh ```
+
+3. ```  ./run_maritime.sh ```
+
+The last two commands execute the example scripts for maritime monitoring and human activity recognition, respectively. The execution includes the entire system pipeline. More specifically:
+
+Firstly, Prob-EC and then oPIEC, using as input the output of Prob-EC. 
+
+- Prob-EC processes the input of 'low-level' events (/inputDatasets/examples) and the event description of the application (e.g. /src/Prob-EC/maritime/event_description). The output of Prob-EC is saved in the /Prob-EC_output/raw folder. 
+- Afterwards, an auxiliary script transforms the output of Prob-EC by isolating the probabilities computed for each event. As a result, the recognition of Prob-EC for each complex event is present in the /Prob-EC_output/preprocessed folder. This format is compatible with oPIEC. 
+- Finally, oPIEC is executed for each of the generated files. The final output, produced by oPIEC, is stored in the /oPIEC_output folder and denotes the maximal intervals during which the event takes place.
+
+The parameters of each script can be adjust for the desired experiment via the declarations at the top of the script's code. You may refer to the comments in the script files for more usage instructions.
 
 ### Documentation
 
