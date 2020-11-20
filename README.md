@@ -2,6 +2,8 @@
 
 Point-based probabilistic event recognition is achieved with Prob-EC. Afterwards, oPIEC processes the output of Prob-EC to construct the maximal temporal intervals of each complex event. 
 
+![System Flow Diagram](system-flow.pdf)
+
 ### Requirements
 
 - A version of Python 3 (https://docs.python.org/3/). The code has been tested with Python 3.8 but running on an different version should not cause any problems.
