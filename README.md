@@ -56,6 +56,10 @@ The parameters of each script can be adjust for the desired experiment via the d
 - /Prob-EC_output contains the output of Prob-EC in the format before ('raw' subfolder) and after ('preprocessed' subfolder) a preprocessing step.
 - /oPIEC_output contains the final output of oPIEC. There is a separate file for each fluent-value pair. 
 
+### License
+
+This program comes with ABSOLUTELY NO WARRANTY. This is free software, and you are welcome to redistribute it under certain conditions; See the [GNU Lesser General Public License v3 for more details](https://www.gnu.org/licenses/lgpl-3.0.html).
+
 ### Documentation
 
 - Mantenoglou P., Artikis A., Paliouras G. [Online Probabilistic Interval-based Event Calculus](https://doi.org/10.3233/FAIA200399). 24th European Conference on Artificial Intelligence (ECAI), Santiago de Compostela, Spain, pp.2624-2631, 2020.
