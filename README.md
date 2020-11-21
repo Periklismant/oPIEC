@@ -27,7 +27,7 @@ Prob-EC and oPIEC may work as two separate systems. However, we use a pipeline o
 
 For download instructions, a brief description of the datasets and usage instructions, you may refer to the '.txt' files in the /inputDatasets/ folder.
 
-### Execution Scripts
+### Execution Instructions
 
 The current version of this repository contains scripts for running the pipeline of Prob-EC and oPIEC on datasets for human activity recognition and maritime monitoring.
 
@@ -56,6 +56,10 @@ The parameters of each script can be adjust for the desired experiment via the d
 - /scripts contains executable scripts for running the example datasets.
 - /Prob-EC_output contains the output of Prob-EC in the format before ('raw' subfolder) and after ('preprocessed' subfolder) a preprocessing step.
 - /oPIEC_output contains the final output of oPIEC. There is a separate file for each fluent-value pair. 
+
+### License
+
+This program comes with ABSOLUTELY NO WARRANTY. This is free software, and you are welcome to redistribute it under certain conditions; See the [GNU Lesser General Public License v3 for more details](https://www.gnu.org/licenses/lgpl-3.0.html).
 
 ### Documentation
 
