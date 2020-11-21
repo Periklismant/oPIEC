@@ -7,9 +7,10 @@ Prob-EC performs probabilistic CER by computing the probability of every complex
 The output of Prob-EC is a stream of complex event - probability pairs for various activities. oPIEC may process a stream of event probabilities and compute maximal temporal intervals during which the event takes place. As seen in Figure 1, the stream of high level events is separated into multiple complex event probability streams which are, subsequently, fed into a different instance of oPIEC. Each instance processes an input stream in data batches, while potential starting points of intervals are stored in a small, auxiliary memory which is managed by oPIEC. Additionally, a probabilistic threshold is used to exclude intervals with a low probability value. As an example, the last instance of oPIEC in Figure 1 does not compute any interval for the event as a result of low event probabilities in the input
 
 <figure class="image">
-    <img src="figures/system-flow.png" width="1000" alt="System Flow Diagram">
+    <img src="figures/system-flow-2.png" width="1000" alt="System Flow Diagram">
     <figcaption>Figure 1. System Flow Diagram</figcaption>
 </figure>
+
 
 Prob-EC and oPIEC may work as two separate systems. However, we use a pipeline of Prob-EC and oPIEC because it has been observed that oPIEC alleviates the uncertainty in the output of Prob-EC, leading to more robust recognition. This approach has been tested on human activity recognition and maritime monitoring applications.  
 
