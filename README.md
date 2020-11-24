@@ -41,15 +41,15 @@ Afterwards, you may execute the example scripts as follows:
 
 2. Adjust the parameters at the top of "run_caviar.sh" and/or "run_maritime.sh". To run the examples we provide, you may only need to change the ```pythonVersion``` parameter to version of Python installed in your system. Simply ``` pythonVersion="3" ``` should be fine if there is only one version of Python3 installed in your system.  
 
-3. Try ``` ./run_caviar.sh ``` or ```  ./run_maritime.sh ``` to run Prob-EC and oPIEC for the selected examples.
+3. Try ``` ./run_caviar.sh ``` or ```  ./run_maritime.sh ``` to run Prob-EC and oPIEC for the desired use case.
 
 More specifically, the last step does the following:
 
-- Prob-EC processes the input of 'low-level' events (/inputDatasets/examples) and the event description of the application (e.g. /src/Prob-EC/maritime/event_description). The output of Prob-EC is saved in the /Prob-EC_output/raw folder. 
+- Firstly, Prob-EC processes the input of 'low-level' events (/inputDatasets/examples) and the event description of the application (e.g. /src/Prob-EC/maritime/event_description). The output of Prob-EC is saved in the /Prob-EC_output/raw folder. 
 - Afterwards, an auxiliary script transforms the output of Prob-EC by isolating the probabilities computed for each event. As a result, the recognition of Prob-EC for each complex event is stored in the /Prob-EC_output/preprocessed folder. This format is compatible with oPIEC. 
 - Finally, oPIEC is executed for each of the generated files. The final output, produced by oPIEC, is stored in the /oPIEC_output folder and denotes the maximal intervals during which the event takes place.
 
-To run custom experiments, you may adjust he parameters of each script (at the top of the file) to change, e.g., the input file of simple events. You may refer to the comments in the script files for more usage instructions.
+To run custom experiments, you may adjust he parameters of each script (at the top of the file) to change, e.g., the input file of simple events. You may refer to the comments in the script files for more usage instructions. 
 
 ### File Description
 
