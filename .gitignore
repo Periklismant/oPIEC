@@ -1,3 +1,6 @@
-inputDatasets/caviar/*
-inputDatasets/maritime/*
+datasets/caviar/*
+datasets/maritime/*
+Prob-EC_output/raw/*.result
+Prob-EC_output/preprocessed/*.pl
+oPIEC_output/*.result
 
