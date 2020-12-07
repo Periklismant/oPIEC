@@ -7,3 +7,4 @@ src/oPIEC-python/__pycache__/*
 scripts/__pycache__/*
 venv/*
 oPIEC.egg-info/*
+__pycache__/*
