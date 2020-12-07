@@ -1,17 +1,33 @@
 import click
 import os
 import sys
+#from pkg_resources import resource_filename, Requirement
 
 ### Get path ###
-scriptPath=os.path.dirname(os.path.realpath(__file__))
-repoPath=os.path.dirname(scriptPath)
+#scriptPath=os.path.dirname(os.path.realpath(__file__))
+#repoPath=os.path.dirname(scriptPath)
 
-### Import functions ### 
-sys.path.append(repoPath + '/src/oPIEC-python/')
+#### Import functions ### 
+#sys.path.append(repoPath + '/src/oPIEC-python/')
 from oPIEC import runoPIEC as oPIECfunction
 import ssResolver
 
+#sys.path.append(repoPath)
+
 ### Helper functions ###
+def splitReqPath(reqPath):
+	pathSpl=reqPath.split('/')
+	if 'oPIEC' in pathSpl:
+		splIndex = pathSpl.index('oPIEC')
+		rootpathSpl=pathSpl[:splIndex+1]
+		datapathSpl=pathSpl[splIndex+1:]
+		rootpath = '/'.join(rootpathSpl)
+		datapath = '/'.join(datapathSpl)
+	else:
+		print("Error! Invalid path. Please specify an input dataset under oPIEC/datasets/")
+		exit(1)
+	return rootpath, datapath
+
 def select_strategy(strategy, durations):
 	# Unbiased strategy: delete the elements of the support set which are least unlikely to 
 	#                    starting point of intervals given all possible progressions of the input timeseries 
@@ -64,10 +80,10 @@ def getEvents(useCase, eventsInp):
 				events.append((fluentName, value))
 			else:
 				events.append((fv, 'true'))
-	print(events)
+	#print(events)
 	return events
 
-def getAuxiliary(useCase, inputFiles, events):
+def getAuxiliary(useCase, repoPath, inputFiles, events):
 	if useCase=='caviar':
 		probecPath = repoPath + '/src/Prob-EC/caviar/er_prob_orig_cached.pl'
 		params = " -a " + inputFiles[0] + " -a " + inputFiles[1]
@@ -99,6 +115,7 @@ class Config(object):
 	def __init__(self):
 		self.usecase=''
 		self.dataset=''
+		self.rootpath=''
 		self.events=[]
 		self.threshold=0.0
 		self.batchsize=0
@@ -109,8 +126,8 @@ class Config(object):
 pass_config = click.make_pass_decorator(Config, ensure=True)
 
 @click.group() # The cli passes the usecase and dataset parameters to the specified subgroup.
-@click.option('--use-case', default='caviar', help='Two use cases are currently supported. Please choose "caviar" or "maritime".')
-@click.option('--dataset', default='examples/caviar_test', help='The folder in "datasets/" which contains the simple events of the experiment. An example is: "examples/caviar_test"')
+@click.option('--use-case', required=True, help='Two use cases are currently supported. Please choose "caviar" or "maritime".')
+@click.option('--dataset', required=True, help='The relative path to the folder which contains the simple events of the experiment. An example is: "./datasets/examples/caviar_test"')
 @click.option('--events', default='all', help="Select the target complex events of the domain. Specify a list of event names, e.g. [moving,meeting].")
 @click.option('--threshold', default=0.9, help='Probability threshold for the intervals of oPIEC.')
 @click.option('--batchsize', default=10, help='The size of the data batches processed by oPIEC.')
@@ -119,9 +136,18 @@ pass_config = click.make_pass_decorator(Config, ensure=True)
 @click.option('--durations', default='[]', help="In the case of 'predictive' oPIEC, insert a list of duration values for the target complex event.")
 @pass_config
 def cli(config, use_case, dataset, events, threshold, batchsize, memsize, strategy, durations):
-	print(use_case)
+	print('Selected use case: ' + use_case)
 	config.usecase=use_case
+	if './' in dataset:
+		dataset=dataset.replace('./','')
+	requestedPath=os.getcwd() + '/' + dataset
+	print('Input data path: ' + requestedPath)
+	rootpath, datapath=splitReqPath(os.path.abspath(requestedPath))
+	#print('Root path ' + rootpath)
+	#print('Data path ' + datapath)
+
 	config.dataset=dataset
+	config.rootpath=rootpath
 	config.events=events
 	config.threshold=threshold
 	config.batchsize=batchsize
@@ -134,12 +160,14 @@ def cli(config, use_case, dataset, events, threshold, batchsize, memsize, strate
 def run_probec(config):
 	"""Run Prob-EC; The input should be in the /datasets folder."""
 	useCase=config.usecase
+	repoPath=config.rootpath
+	#print(repoPath)
 	events=getEvents(useCase,config.events)
 	outFileName=config.dataset.split('/')[-1]
-	inputFolder= repoPath + '/datasets/' + config.dataset
+	inputFolder= repoPath + '/' + config.dataset
 
 	inputFiles = getInputFiles(useCase, inputFolder)
-	probecPath, events, params = getAuxiliary(useCase, inputFiles, events)
+	probecPath, events, params = getAuxiliary(useCase, repoPath, inputFiles, events)
 	fluentList, valueList, params = transformFluentsVals(events, params)
 	rawPath = repoPath + '/Prob-EC_output/raw/' + outFileName + '.result'
 
@@ -164,14 +192,15 @@ def run_pipeline(config):
 	useCase=config.usecase
 	events=getEvents(useCase,config.events)
 	outFileName=config.dataset.split('/')[-1]
-	inputFolder= repoPath + '/datasets/' + config.dataset
+	repoPath=config.rootpath
+	inputFolder= repoPath + '/' + config.dataset
 
 	inputFiles = getInputFiles(useCase, inputFolder)
-	probecPath, events, params = getAuxiliary(useCase, inputFiles, events)
+	probecPath, events, params = getAuxiliary(useCase, repoPath, inputFiles, events)
 	fluentList, valueList, params = transformFluentsVals(events, params)
-	print(params)
-	print(fluentList)
-	print(valueList)
+	#print(params)
+	#print(fluentList)
+	#print(valueList)
 	rawPath = repoPath + '/Prob-EC_output/raw/' + outFileName + '.result'
 	
 	os.system("problog " + probecPath + params + ' > ' + rawPath)

@@ -1,7 +1,0 @@
-setup.py
-oPIEC.egg-info/PKG-INFO
-oPIEC.egg-info/SOURCES.txt
-oPIEC.egg-info/dependency_links.txt
-oPIEC.egg-info/entry_points.txt
-oPIEC.egg-info/requires.txt
-oPIEC.egg-info/top_level.txt
