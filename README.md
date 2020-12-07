@@ -12,20 +12,20 @@ The output of Prob-EC is a stream of complex event - probability pairs for vario
 
 Prob-EC and oPIEC may work as two separate systems. However, we use a pipeline of Prob-EC and oPIEC because it has been observed that oPIEC alleviates the uncertainty in the output of Prob-EC, leading to more robust recognition. This approach has been tested on human activity recognition and maritime monitoring applications.  
 
-### Requirements
-
-- A version of Python 3 (https://docs.python.org/3/). The code has been tested with Python 3.8 but running on a different version should not cause any problems.
-- ProbLog 2 (https://problog.readthedocs.io/en/latest/install.html), which is mandatory for Prob-EC.
-- The intervaltree Python 3 package (https://pypi.org/project/intervaltree/), which is needed for the current version of oPIEC.
-
 ### Available Applications
 
 - Human Activity Recognition (CAVIAR dataset: http://groups.inf.ed.ac.uk/vision/CAVIAR/CAVIARDATA1/)
 - Maritime Monitoring (Brest dataset: https://zenodo.org/record/1167595)
 
-For download instructions, a brief description of the datasets and usage instructions, you may refer to the '.txt' files in the /inputDatasets/ folder.
+For download instructions, a brief description of the datasets and usage instructions, you may refer to the '.txt' files in the /datasets folder.
 
-### Execution Instructions
+### Requirements
+
+- A version of Python 3 (https://docs.python.org/3/) with pip (https://pip.pypa.io/en/stable/installing/) and setuptools (https://pypi.org/project/setuptools/).
+- The rest of the required Python packages are installed via setuptools (see the instructions section). These packages include ProbLog 2 (https://dtai.cs.kuleuven.be/problog/) and the intervaltree package (https://pypi.org/project/intervaltree/)
+- Please consider installing these packages in a virtual environment (https://docs.python.org/3/tutorial/venv.html) to avoid messing up the (versions of the) packages installed in the Python version installed in your system. This is explained in the Instructions sections. 
+
+### Instructions: Installation and Execution 
 
 The current version of this repository contains scripts for running the pipeline of Prob-EC and oPIEC on datasets for human activity recognition and maritime monitoring.
 
