@@ -1,0 +1,4 @@
+
+		[console_scripts]
+		oPIEC=oPIEC_cli:cli
+	

@@ -1,0 +1,5 @@
+click==7.1.2
+intervaltree==3.1.0
+-e git+https://github.com/Periklismant/oPIEC@a75410a3281f32f97f5407a1b0c575edb3991f94#egg=oPIEC&subdirectory=scripts
+problog==2.1.0.42
+sortedcontainers==2.3.0

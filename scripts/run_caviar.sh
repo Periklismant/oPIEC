@@ -7,7 +7,7 @@ pythonVersion="3.8" # Insert the python to which you installed the packages for 
 					# If you are using Python 3 and have only version of python installed, pythonVersion="3" should work fine. 
 
 problog ../src/Prob-EC/caviar/er_prob_orig_cached.pl > ../Prob-EC_output/raw/${fileName}.result && # Change input files from 'er_prob_orig_cached.pl'
-./fixoutput.sh "meeting,moving" "true,true" ${fileName} ${pythonVersion} &&
+./fixoutput.sh "meeting,moving" "true,true" ${fileName} &&
 cd ../src/oPIEC-python/ &&
 python${pythonVersion} oPIEC.py ${fileName}_meeting_true && # Execute oPIEC for both events.
 python${pythonVersion} oPIEC.py ${fileName}_moving_true 

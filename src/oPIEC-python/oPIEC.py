@@ -211,12 +211,12 @@ def oPIEC(inputArray, threshold, start_timestamp=0, ignore_value=sys.maxsize, su
 
 	return result, support_set, prev_prefix, ignore_value, end_timestamp 
 
-def runoPIEC(fileName, threshold=0.9, batchsize=1000, WM_size=2, ssResolver=(smallestRanges, None)):
+def runoPIEC(repoPath, fileName, threshold=0.9, batchsize=1000, WM_size=2, ssResolver=(smallestRanges, None)):
 	'''Reads the recognition of Prob-EC from the file specified by the user.
 	   Executes oPIEC for the given parameters and write the output to a file.'''
 	print("Starting `oPIEC' for " + fileName + "...")
-	baseFolder = '../../Prob-EC_output/preprocessed/'
-	writeFolder = '../../oPIEC_output/'
+	baseFolder = repoPath + '/Prob-EC_output/preprocessed/'
+	writeFolder = repoPath + '/oPIEC_output/'
 	inputFiles = [f.path for f in os.scandir(baseFolder) if (fileName in f.name)]
 	for filePath in inputFiles:
 		allInputs=get_input_and_fill(filePath)
@@ -239,27 +239,30 @@ def runoPIEC(fileName, threshold=0.9, batchsize=1000, WM_size=2, ssResolver=(sma
 
 # General parameters #
 
-threshold=0.9 # Minimum accepted interval probability.
-batchsize=1000 # Number of elements of each data batch.
-WM_size=2 # Maximum number of elements in the support set.
-
+#threshold=float(sys.argv[2]) # Minimum accepted interval probability.
+#batchsize=int(sys.argv[3]) # Number of elements of each data batch.
+#WM_size=int(sys.argv[4]) # Maximum number of elements in the support set.
+#selected_strategy=sys.argv[5] # Selected support set maintenance strategy
+#durations=map(float, sys.argv[6].strip('[]').split(','))
 # Support set maintenance strategies #
 
 # Unbiased strategy: delete the elements of the support set which are least unlikely to 
 #                    starting point of intervals given all possible progressions of the input timeseries 
 #                    (of event probability values) is equally likely. 
-
-ssResolver=(smallestRanges, None)
-
+#if selected_strategy=="unbiased":
+#	ssResolver=(smallestRanges, None)
 # Predictive strategy: delete the least likely starting point of the support set given prior knowledge
 #                      about the expected duration of the complex event. Add the duration values of past 
 #                      event occurrences in the durationsStatistics array and use the durationLikelihood
 #                      function (uncomment the two following lines).
+#elif selected_strategy=="predictive":
+#	durationStatistics = durations
+#	ssResolver=(durationLikelihood, fix_durations(durationStatistics,WM_size))
+#else:
+#	print("Error! Invalid strategy selected.")
+#	exit(1)
 
-#durationStatistics = [2000, 3000, 3500, 4000]
-#ssResolver=(durationLikelihood, fix_durations(durationStatistics,WM_size))
-
-runoPIEC(sys.argv[1], threshold, batchsize, WM_size, ssResolver)
+#runoPIEC(sys.argv[1], threshold, batchsize, WM_size, ssResolver)
 
 ## Unit Tests ##
 #resolver1=(smallestRanges, None)
