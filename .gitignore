@@ -8,3 +8,5 @@ scripts/__pycache__/*
 venv/*
 oPIEC.egg-info/*
 __pycache__/*
+scripts/run_maritime.sh
+scripts/run_caviar.sh
