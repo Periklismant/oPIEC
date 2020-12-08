@@ -1,3 +1,7 @@
+# oPIEC: Online Probabilistic Interval-based Event Calculus
+
+oPIEC is a complex event recognition system which supports [Event Calculus](https://en.wikipedia.org/wiki/Event_calculus) reasoning over data streams under uncertainty. Firstly, the probability of the occurrence of a complex event is calculated at each time-point using Event Calculus rules. Afterwards, oPIEC processes these probabilities to determine the maximal intervals during which the complex event takes place. 
+
 ## Probabilistic Complex Event Recognition
 
 Complex Event Recognition (CER) systems process streams of ‘low-level’ or ‘simple' events, derived from sensor data, and infer 'high-level' or 'composite' activities by means of pattern matching. These patterns combine simple and composite event occurrences with spatio-temporal constraints. Uncertainty is inherent in many CER applications. An input stream may contain low-level events expressed as Pr::LLE, where Pr corresponds to the probability value of the low-level event, serving as its confidence estimate. A probabilistic event recognition system consumes such streams and derives a collection of complex events with attached probability values. 
@@ -29,7 +33,9 @@ Please consider installing these packages in a [virtual environment](https://doc
 
 ### Instructions: Installation and Execution 
 
-To download oPIEC, open a terminal and follow these steps:
+These instructions describe the installation of oPIEC on a Debian GNU/Linux or mac OS machine with Python 3, pip, setuptools and virtualenv. However, some steps/commands change in the case of Windows. Also, Windows users may need install [MinGW/MSYS](http://www.mingw.org/wiki/MSYS) and [git for Windows](https://gitforwindows.org/) before proceeding with these instructions. 
+
+Firstly, open a terminal and follow these steps:
 
 1. ``` git clone https://github.com/Periklismant/oPIEC ``` in the folder of your preference. 
 
@@ -37,9 +43,9 @@ To download oPIEC, open a terminal and follow these steps:
 
 Afterwards, you may set up and activate a virtual environment for installing the required Python packages as follows:
 
-3. ``` virtualenv venv ``` creates a virtual environment named "venv".
+3. ``` virtualenv venv ``` creates a virtual environment named "venv". To create a virtual environment in Windows, run ``` python -m venv ./venv ```.
 
-4. ``` . venv/bin/activate ``` activates "venv". You may check the Python version used by venv with ``` python --version ```. Also, the output of ``` pip freeze ```, which prints the list of installed python packages, should be an empty list.
+4. ``` . venv/bin/activate ``` activates "venv". You may check the Python version used by venv with ``` python --version ```. Also, the output of ``` pip freeze ```, which prints the list of installed python packages, should be an empty list. In Windows, run ``` venv\Scripts\activate.bat ``` instead. 
 
 5. ``` pip install . ``` installs the python packages specified in the setup.py file. Now, the output of ``` pip freeze ``` should include these packages. 
 
