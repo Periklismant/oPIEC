@@ -41,9 +41,9 @@ Afterwards, you may set up and activate a virtual environment for installing the
 
 4. ``` . venv/bin/activate ``` activates "venv". You may check the Python version used by venv with ``` python --version ```. Also, the output of ``` pip freeze ```, which prints the list of installed python packages, should be an empty list.
 
-5. ``` pip install . ``` installs the python packages specified in the setup.py file.
+5. ``` pip install . ``` installs the python packages specified in the setup.py file. Now, the output of ``` pip freeze ``` should include these packages. 
 
-Apart from installing the packages needed for oPIEC, the final command installs a command line interface for oPIEC. 
+Apart from installing the packages needed for oPIEC, the last command installs a command line interface for oPIEC. 
 
 6. For example, you may use the interface of oPIEC as follows: 
 
