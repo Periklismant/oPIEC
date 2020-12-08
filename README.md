@@ -1,6 +1,6 @@
 # oPIEC: Online Probabilistic Interval-based Event Calculus
 
-oPIEC is a complex event recognition system which supports [Event Calculus](https://en.wikipedia.org/wiki/Event_calculus) reasoning over data streams under uncertainty. Firstly, the probability of the occurrence of a complex event is calculated at each time-point using Event Calculus rules. Afterwards, oPIEC processes these probabilities to determine the maximal intervals during which the complex event takes place. 
+oPIEC is a complex event recognition system which supports [Event Calculus](https://en.wikipedia.org/wiki/Event_calculus) reasoning over data streams under uncertainty. Firstly, the probability of the occurrence of a complex event is calculated, using Event Calculus rules, at each time-point. Afterwards, oPIEC processes these event probabilities to determine the maximal temporal intervals during which the complex event takes place. 
 
 ## Probabilistic Complex Event Recognition
 
