@@ -22,28 +22,36 @@ For download instructions, a brief description of the datasets and usage instruc
 ### Requirements
 
 - A version of Python 3 (https://docs.python.org/3/) with pip (https://pip.pypa.io/en/stable/installing/) and setuptools (https://pypi.org/project/setuptools/).
-- The rest of the required Python packages are installed via setuptools (see the instructions section). These packages include ProbLog 2 (https://dtai.cs.kuleuven.be/problog/) and the intervaltree package (https://pypi.org/project/intervaltree/)
-- Please consider installing these packages in a virtual environment (https://docs.python.org/3/tutorial/venv.html) to avoid messing up the (versions of the) packages installed in the Python version installed in your system. This is explained in the Instructions sections. 
+
+The rest of the required Python packages are installed via setuptools (see the instructions section). These packages include ProbLog 2 (https://dtai.cs.kuleuven.be/problog/) and the intervaltree package (https://pypi.org/project/intervaltree/).
+
+Please consider installing these packages in a virtual environment (https://docs.python.org/3/tutorial/venv.html) to avoid messing up the (versions of the) packages installed in the Python version installed in your system. The process of setting up a virtual environment is explained in the Instructions section. 
 
 ### Instructions: Installation and Execution 
 
-The current version of this repository contains scripts for running the pipeline of Prob-EC and oPIEC on datasets for human activity recognition and maritime monitoring.
-
-To download this repository, please proceed with:
+To download oPIEC, open a terminal and follow these steps:
 
 1. ``` git clone https://github.com/Periklismant/oPIEC ``` in the folder of your preference. 
 
 2. ``` cd oPIEC ```
 
-Afterwards, you may execute the example scripts as follows:
+Afterwards, you may set up and activate a virtual environment for installing the required Python packages as follows:
 
-1. ```  cd ./scripts ```
+1. ``` virtualenv venv ``` creates a virtual environment named "venv".
 
-2. Adjust the parameters at the top of "run_caviar.sh" and/or "run_maritime.sh". To run the examples we provide, you may only need to change the ```pythonVersion``` parameter to version of Python installed in your system. Simply ``` pythonVersion="3" ``` should be fine if there is only one version of Python3 installed in your system.  
+2. ``` . venv/bin/activate ``` activates "venv". You may check the Python version used by venv with ``` python --version ```. Also, the output of ``` pip freeze ```, which prints the list of installed python packages, should be an empty list.
 
-3. Try ``` ./run_caviar.sh ``` or ```  ./run_maritime.sh ``` to run Prob-EC and oPIEC for the desired use case.
+3. ``` pip install . ``` installs the python packages specified in the setup.py file.
 
-More specifically, the last step does the following:
+Apart from installing the packages needed for oPIEC, the final command installs a command line interface for oPIEC. For example, you may use the interface of oPIEC as follows: 
+
+- ``` oPIEC ``` or ``` oPIEC --help ``` prints the usage instructions for oPIEC.
+
+- ``` oPIEC --use-case maritime --dataset ./datasets/examples/maritime_short_test run-pipeline ```, when executed from the root folder of the repository, runs a pipeline of Prob-EC and oPIEC using the maritime data available in the /datasets/examples/maritime_short_test folder.
+
+- ``` oPIEC --use-case caviar --dataset ./datasets/examples/caviar_test run-pipeline ```, when executed from the root folder of the repository, runs a pipeline of Prob-EC and oPIEC using the human activity data available in the /datasets/examples/caviar_test folder.
+
+### Execution Details
 
 - Firstly, Prob-EC processes the input of 'low-level' events (/inputDatasets/examples) and the event description of the application (e.g. /src/Prob-EC/maritime/event_description). The output of Prob-EC is saved in the /Prob-EC_output/raw folder. 
 - Afterwards, an auxiliary script transforms the output of Prob-EC by isolating the probabilities computed for each event. As a result, the recognition of Prob-EC for each complex event is stored in the /Prob-EC_output/preprocessed folder. This format is compatible with oPIEC. 
