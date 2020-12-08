@@ -25,7 +25,7 @@ For download instructions, a brief description of the datasets and usage instruc
 
 The rest of the required Python packages are installed via setuptools (see the Instructions section). These packages include [ProbLog 2](https://dtai.cs.kuleuven.be/problog/) and the [intervaltree](https://pypi.org/project/intervaltree/) package.
 
-Please consider installing these packages in a [virtual environment](https://docs.python.org/3/tutorial/venv.html) to avoid messing up the (versions of the) packages installed in the Python version installed in your system. The process of setting up a virtual environment is explained in the Instructions section. 
+Please consider installing these packages in a [virtual environment](https://docs.python.org/3/tutorial/venv.html) to avoid messing up the (versions of the) packages installed in the Python version of your system. The process of setting up a virtual environment is explained in the Instructions section. 
 
 ### Instructions: Installation and Execution 
 
