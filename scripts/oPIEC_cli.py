@@ -1,18 +1,10 @@
 import click
 import os
 import sys
-#from pkg_resources import resource_filename, Requirement
-
-### Get path ###
-#scriptPath=os.path.dirname(os.path.realpath(__file__))
-#repoPath=os.path.dirname(scriptPath)
 
 #### Import functions ### 
-#sys.path.append(repoPath + '/src/oPIEC-python/')
 from oPIEC import runoPIEC as oPIECfunction
 import ssResolver
-
-#sys.path.append(repoPath)
 
 ### Helper functions ###
 def splitReqPath(reqPath):
@@ -80,7 +72,6 @@ def getEvents(useCase, eventsInp):
 				events.append((fluentName, value))
 			else:
 				events.append((fv, 'true'))
-	#print(events)
 	return events
 
 def getAuxiliary(useCase, repoPath, inputFiles, events):
@@ -127,7 +118,7 @@ pass_config = click.make_pass_decorator(Config, ensure=True)
 
 @click.group() # The cli passes the usecase and dataset parameters to the specified subgroup.
 @click.option('--use-case', required=True, help='Two use cases are currently supported. Please choose "caviar" or "maritime".')
-@click.option('--dataset', required=True, help='The relative path to the folder which contains the simple events of the experiment. An example is: "./datasets/examples/caviar_test"')
+@click.option('--dataset', default='.', help='The relative path to the folder which contains the simple events of the experiment. An example is: "./datasets/examples/caviar_test"')
 @click.option('--events', default='all', help="Select the target complex events of the domain. Specify a list of event names, e.g. [moving,meeting].")
 @click.option('--threshold', default=0.9, help='Probability threshold for the intervals of oPIEC.')
 @click.option('--batchsize', default=10, help='The size of the data batches processed by oPIEC.')
@@ -138,14 +129,13 @@ pass_config = click.make_pass_decorator(Config, ensure=True)
 def cli(config, use_case, dataset, events, threshold, batchsize, memsize, strategy, durations):
 	print('Selected use case: ' + use_case)
 	config.usecase=use_case
-	if './' in dataset:
+	if dataset=='.':
+		dataset=''
+	elif './' in dataset:
 		dataset=dataset.replace('./','')
 	requestedPath=os.getcwd() + '/' + dataset
 	print('Input data path: ' + requestedPath)
 	rootpath, datapath=splitReqPath(os.path.abspath(requestedPath))
-	#print('Root path ' + rootpath)
-	#print('Data path ' + datapath)
-
 	config.dataset=dataset
 	config.rootpath=rootpath
 	config.events=events
@@ -161,7 +151,6 @@ def run_probec(config):
 	"""Run Prob-EC; The input should be in the /datasets folder."""
 	useCase=config.usecase
 	repoPath=config.rootpath
-	#print(repoPath)
 	events=getEvents(useCase,config.events)
 	outFileName=config.dataset.split('/')[-1]
 	inputFolder= repoPath + '/' + config.dataset
@@ -180,6 +169,7 @@ def run_probec(config):
 @pass_config
 def run_opiec(config, inputprefix):
 	"""Run oPIEC for some input files in the "preprocessed" folder."""
+	repoPath=config.rootpath
 	events=getEvents(config.usecase,config.events)
 	resolver= select_strategy(config.strategy,config.durations)
 	for i in range(0,len(events)):
