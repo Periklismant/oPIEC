@@ -2,7 +2,7 @@
 
 oPIEC is an implementation of the [Event Calculus](https://en.wikipedia.org/wiki/Event_calculus) handling the uncertainty of data streams. First, instantaneous probabilities of fluents, expressing complex activities, are calculated, using Event Calculus rules, at each time-point of a data stream. Afterwards, oPIEC processes these probabilities to compute the maximal temporal intervals during which a fluent holds. 
 
-## Probabilistic Complex Event Recognition
+## Probabilistic Complex/Activity Event Recognition
 
 Complex Event Recognition (CER) systems process streams of ‘low-level’ or ‘simple' events, derived from sensor data, and infer 'high-level' or 'composite' activities by means of pattern matching. These patterns combine simple and composite event occurrences with spatio-temporal constraints. Uncertainty is inherent in many CER applications. An input stream may contain low-level events expressed as Pr::LLE, where Pr corresponds to the probability value of the low-level event, serving as its confidence estimate. A probabilistic event recognition system consumes such streams and derives a collection of complex events with attached probability values. 
 
