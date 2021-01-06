@@ -16,14 +16,14 @@ The output of Prob-EC is a stream of complex event - probability pairs for vario
 
 Prob-EC and oPIEC may work as two separate systems. However, we use a pipeline of Prob-EC and oPIEC because it has been observed that oPIEC alleviates the uncertainty in the output of Prob-EC, leading to more robust recognition. This approach has been tested on human activity recognition and maritime monitoring applications.  
 
-### Available Applications
+## Available Applications
 
 - Human Activity Recognition ([CAVIAR dataset](http://groups.inf.ed.ac.uk/vision/CAVIAR/CAVIARDATA1/)).
 - Maritime Monitoring ([Brest dataset](https://zenodo.org/record/1167595)).
 
 For download instructions, a brief description of the datasets and usage instructions, you may refer to the '.txt' files in the /datasets folder.
 
-### Requirements
+## Requirements
 
 - A version of [Python 3](https://docs.python.org/3/) with [pip](https://pip.pypa.io/en/stable/installing/) and [setuptools](https://pypi.org/project/setuptools/).
 
@@ -31,7 +31,7 @@ The rest of the required Python packages are installed via setuptools (see the I
 
 Please consider installing these packages in a [virtual environment](https://docs.python.org/3/tutorial/venv.html) to avoid messing up the (versions of the) packages installed in the Python version of your system. The process of setting up a virtual environment is explained in the Instructions section. 
 
-### Instructions: Installation and Execution 
+## Instructions: Installation and Execution 
 
 These instructions describe the installation of oPIEC on a Debian GNU/Linux or mac OS machine with Python 3, pip, setuptools and virtualenv. However, some steps/commands change in the case of Windows. Also, Windows users may need install [MinGW/MSYS](http://www.mingw.org/wiki/MSYS) and [git for Windows](https://gitforwindows.org/) before proceeding with these instructions. 
 
@@ -61,7 +61,7 @@ Apart from installing the packages needed for oPIEC, the last command installs a
 
 7. After you finish experimenting, do not forget to ``` deactivate ``` the virtual environment.
 
-### Execution Details
+## Execution Details
 
 The following steps describe the execution of the 'run-pipeline' command of the command line interface of oPIEC. There are two other available commands, 'run-probec' and 'run-opiec', which separately execute Prob-EC and oPIEC, respectively. 'run-pipeline' does the following:
 
@@ -73,11 +73,16 @@ The following steps describe the execution of the 'run-pipeline' command of the 
 
 To run custom experiments, you may adjust he parameters of each script (at the top of the file) to change, e.g., the input file of simple events. You may refer to the comments in the script files for more usage instructions. 
 
-### License
+# License
 
 This program comes with ABSOLUTELY NO WARRANTY. This is free software, and you are welcome to redistribute it under certain conditions; See the [GNU Lesser General Public License v3 for more details](https://www.gnu.org/licenses/lgpl-3.0.html).
 
-### Documentation
+# Documentation
 
 - Mantenoglou P., Artikis A., Paliouras G. [Online Probabilistic Interval-based Event Calculus](https://doi.org/10.3233/FAIA200399). 24th European Conference on Artificial Intelligence (ECAI), Santiago de Compostela, Spain, pp.2624-2631, 2020.
 - Skarlatidis A., Artikis A., Filipou J., Paliouras G. [A probabilistic logic programming event calculus](https://doi.org/10.1017/S1471068413000690). Theory and Practice of Logic Programming (TPLP), 15(2):213-245, 2015.
+
+# Related Software
+- [RTEC](https://github.com/aartikis/RTEC): RTEC is an Event Calculus implementation optimised for stream reasoning.
+- [Incremental RTEC](https://github.com/eftsilio/Incremental_RTEC): Incremental RTEC is an extension of RTEC for handling more efficiently out-of-order data streams.
+- [Wayeb](https://github.com/ElAlev/Wayeb): Wayeb is a Complex Event Processing and Forecasting (CEP/F) engine written in Scala. It is based on symbolic automata and Markov models.
