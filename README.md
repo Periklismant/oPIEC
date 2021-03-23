@@ -86,3 +86,4 @@ This program comes with ABSOLUTELY NO WARRANTY. This is free software, and you a
 - [RTEC](https://github.com/aartikis/RTEC): RTEC is an Event Calculus implementation optimised for stream reasoning.
 - [Incremental RTEC](https://github.com/eftsilio/Incremental_RTEC): Incremental RTEC is an extension of RTEC for handling more efficiently out-of-order data streams.
 - [Wayeb](https://github.com/ElAlev/Wayeb): Wayeb is a Complex Event Processing and Forecasting (CEP/F) engine written in Scala. It is based on symbolic automata and Markov models.
+- [OLED](https://github.com/nkatzz/ORL): Online Learning of Event Definitions. OLED is a supervised machine learning tool for constructing Event Calculus rules, such as complex event patterns, from annotated data streams.
