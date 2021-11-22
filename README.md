@@ -8,13 +8,9 @@ Complex Event Recognition (CER) systems process streams of ‘low-level’ or �
 
 Prob-EC performs probabilistic CER by computing the probability of every complex event at each time-point. Prob-EC extends the Event Calculus, a logic formalism for representing and reasoning about events and their effects, with the ability to handle uncertainty in the input stream using the probabilistic reasoning modules of ProbLog 2. As an example, see the flow chart of the system, where Prob-EC and oPIEC are employed in the case of human activity recognition. Prob-EC, equipped with the event description of the domain, processes a probabilistic stream of simple events, e.g. \`walking', and computes the complex events, like \`meeting' -- a relational event between multiple agents, that occur at each time-point, along with the probability of their occurrence. 
 
-<!--
 <figure class="image">
-    <img src="figures/opiec-schema.pdf" width="1000" alt="System Flow Diagram">
+    <img src="figures/opiec-schema.png" width="1000" alt="System Flow Diagram">
 </figure>
--->
-
-<embed src="opiec-schema.pdf" width="100px" />
 
 The output of Prob-EC is a stream of complex event - probability pairs for various activities. oPIEC may process a stream of event probabilities and compute maximal temporal intervals during which the event takes place. As seen in the flow diagram, the stream of high level events is separated into multiple complex event probability streams which are, subsequently, fed into a different instance of oPIEC. Each instance processes an input stream in data batches, while potential starting points of intervals are stored in a small, auxiliary memory which is managed by oPIEC. Additionally, a probabilistic threshold is used to exclude intervals with a low probability value. As an example, the last instance of oPIEC in the diagram does not compute any interval for the event as a result of low event probabilities in the input.
 
