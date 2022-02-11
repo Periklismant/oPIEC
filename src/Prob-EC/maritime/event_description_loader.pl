@@ -1,0 +1,8 @@
+:- 	['auxiliary/compare'],
+	['auxiliary/vesselStaticInfo'],
+	['auxiliary/staticDataPredicates'],
+	['auxiliary/typeSpeeds'],
+	['auxiliary/thresholds'],
+	['event_description/prob_event_defs_maritime_cached'],
+	['event_description/prob_initially.pl'],
+	['event_description/hierarchy.pl'],
