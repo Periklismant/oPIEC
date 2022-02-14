@@ -70,7 +70,7 @@ def get_prolog_facts(inputFile, outputFile):
 	inputFileFixed = inputFilePath + '_fixed_proximity.csv'
 	f=open(inputFileFixed,'r')
 	write_path_parent = '../applications/maritime/datasets/Brest_with_noise_preprocessed/'
-	fw=open(write_path_parent + outputFile + '.csv', 'w')
+	fw=open(write_path_parent + outputFile + '.pl', 'w')
 	#### read-write loop --> Records the events, vessels and proximate vessel pairs of each time point 
 	eventCache = dict() # contains all events concerning the current timepoint.
 	vesselCache = dict() # contains all vessels recorded at the current timepoint

@@ -45,7 +45,7 @@ dependency(proximity, tugging).
 eventDependencies(Event, L):-
 	findall(X, dependency(X, Event), L).
 
-member1(X,[H|_]) :- X==H,!.
+member1(X,[H|_]) :- X=H,!.
 member1(X,[_|T]) :- member1(X,T).
  
 distinct([],[]).

@@ -1,10 +1,13 @@
-:- 	['auxiliary/compare'],
+load_event_description:- 
+	['auxiliary/compare'],
 	['auxiliary/vesselStaticInfo'],
 	['auxiliary/staticDataPredicates'],
 	['auxiliary/typeSpeeds'],
 	['auxiliary/thresholds'],
 	['auxiliary/timeModel'],
-	['event_description/prob_event_defs_maritime_cached'],
-	['event_description/prob_initially'],
+	%assertFirstTimepoint,
+	['event_description/rules'],
+	['event_description/declarations'],
 	['event_description/hierarchy'],
-	['datasets/initialProbabilities'].
+	['datasets/initialProbabilities'],
+	assertInitialProbabilities.

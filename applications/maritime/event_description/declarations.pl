@@ -1,3 +1,7 @@
+%--------- dynamic entities -----------------%
+%% Vessels are asserted/retracted depending on window information.
+dynamicEntity(vessel, 1).
+
 %----------------area types -----------------%
 area(anchorage).
 area(nearCoast).
@@ -31,12 +35,14 @@ fluent(movingSpeed, [vessel], [below, normal, above]).
 
 %----------------- underWay ------------------% 
 fluent(underWay, [vessel], [true]).
+sdFluent(underWay).
 
 %----------------- drifting ------------------%
 fluent(drifting, [vessel], [true]).
 
 %-------------- anchoredOrMoored ---------------%
 fluent(anchoredOrMoored, [vessel], [true]).
+sdFluent(anchoredOrMoored).
 
 %---------------- tuggingSpeed ----------------%
 fluent(tuggingSpeed, [vessel], [true]).
@@ -46,12 +52,16 @@ fluent(proximity, [vessel, vessel], [true]).
 
 %--------------- tugging ------------------%
 fluent(tugging, [vessel, vessel], [true]).
+sdFluent(tugging).
 
 %---------------- rendezVous -----------------%
 fluent(rendezVous, [vessel, vessel], [true]).
+sdFluent(rendezVous).
 
 %-------- loitering --------------------------%
 fluent(loitering, [vessel], [true]).
+sdFluent(loitering).
 
 %-------- pilotOps ---------------------------%
 fluent(pilotBoarding, [vessel, vessel], [true]).
+sdFluent(pilotBoarding). % TODO: Add sdFluent status information in fluent predicate to avoid missing sdFluent/1 definition error. 

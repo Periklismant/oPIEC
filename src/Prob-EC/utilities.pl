@@ -1,7 +1,32 @@
-%Cache the initial values of all fluents in the application.
 
+
+%
+dynamicEntity(happensAt, 2). % Retract all happensAt facts after each window.
+
+initDynamic:-
+	(
+		dynamicEntity(Type, ArgNo),
+		length(ArgList, ArgNo),
+		Instance =..[Type|ArgList],
+		assertz(Instance),
+		retractall(Instance),
+		fail
+	;
+		true
+	).
+forgetDynamic:-
+	(
+		dynamicEntity(Type, ArgNo),
+		length(ArgList, ArgNo),
+		Instance =..[Type|ArgList],
+		retractall(Instance),
+		fail
+	;
+		true
+	).
+
+% Generate valid grounding. 
 groundArguments([],[]).
-
 groundArguments([ArgSort|Sorts], [Arg|Args]):-
 	ArgFull =.. [ArgSort, Arg],
 	ArgFull,
@@ -14,10 +39,12 @@ generateGroundFluent(FluentName, GroundFluent):-
 	GroundFluent =.. [FluentName|Arguments].
 
 
+%Cache the initial values of all fluents in the application.
 %getInitially(+FluentList, +FirstTimepointOfApplication).
 getInitially([], _T).
 
 getInitially([Fluent|RestFluents], T):-
+	debugprint(Fluent),
 	fluent(Fluent, _ArgumentSorts, Values),
 	getInitialValues(Fluent, Values, T), 
 	getInitially(RestFluents, T).

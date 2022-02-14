@@ -1,8 +1,3 @@
-%---------------- meets ---------------------%
-% two vessels 
-meets(Vessel, Vessel):-
-
-
 %----------------area types -----------------%
 areaType(Area, Area). % area ids are removed in preprocessing because the "string" library of problog is not finished.
 %areaType(Area, AreaType):-

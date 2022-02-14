@@ -3,11 +3,11 @@
 # Currently supported applications: "caviar", "maritime"
 
 applicationName="maritime" #"caviar"
-streamFileName="test"
-loader="../applications/${applicationName}/loader.pl"
-stream="../applications/${applicationName}/datasets/${streamFileName}.pl"
+streamFileName="Brest_short"
+loader="../../applications/${applicationName}/loader.pl"
+stream="../../applications/${applicationName}/datasets/Brest_with_noise_preprocessed/${streamFileName}.pl"
 
-problog ../src/Prob-EC/probec.pl -a loader -a stream > ../Prob-EC_output/raw/${fileName}.result && # Change input files from 'er_prob_orig_cached.pl'
+problog ../src/Prob-EC/probec.pl -a ${loader} -a ${stream} > ${applicationName}.result
 #./fixoutput.sh ".." "meeting,moving" "true,true" ${fileName} &&
 #cd ../src/oPIEC-python/ &&
 #python oPIEC.py ${fileName}_meeting_true && # Execute oPIEC for both events.
