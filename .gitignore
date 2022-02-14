@@ -1,5 +1,4 @@
-datasets/caviar/*
-datasets/maritime/*
+datasetsOLD/*
 Prob-EC_output/raw/*.result
 Prob-EC_output/preprocessed/*.pl
 oPIEC_output/*.result
@@ -10,3 +9,7 @@ oPIEC.egg-info/*
 __pycache__/*
 scripts/run_maritime.sh
 scripts/run_caviar.sh
+applications/maritime/datasets/*
+applications/caviar/datasets/*
+src/Prob-EC/applicationsOld/*
+src/Prob-EC/test*

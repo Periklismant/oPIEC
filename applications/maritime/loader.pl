@@ -3,6 +3,8 @@
 	['auxiliary/staticDataPredicates'],
 	['auxiliary/typeSpeeds'],
 	['auxiliary/thresholds'],
+	['auxiliary/timeModel'],
 	['event_description/prob_event_defs_maritime_cached'],
-	['event_description/prob_initially.pl'],
-	['event_description/hierarchy.pl'],
+	['event_description/prob_initially'],
+	['event_description/hierarchy'],
+	['datasets/initialProbabilities'].
