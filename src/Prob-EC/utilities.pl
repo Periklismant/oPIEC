@@ -2,10 +2,12 @@
 
 %
 dynamicEntity(happensAt, 2). % Retract all happensAt facts after each window.
+initEntity(cached, 1).
+initEntity(sdFluent, 1).
 
 initDynamic:-
 	(
-		dynamicEntity(Type, ArgNo),
+		initEntity(Type, ArgNo),
 		length(ArgList, ArgNo),
 		Instance =..[Type|ArgList],
 		assertz(Instance),
@@ -20,10 +22,17 @@ forgetDynamic:-
 		length(ArgList, ArgNo),
 		Instance =..[Type|ArgList],
 		retractall(Instance),
+		findall(X, vessel(X), Vessels),
 		fail
 	;
 		true
 	).
+
+uniqueArguments([]).
+
+uniqueArguments([H|T]):-
+	\+ member(H, T), 
+	uniqueArguments(T).	
 
 % Generate valid grounding. 
 groundArguments([],[]).
@@ -36,6 +45,7 @@ groundArguments([ArgSort|Sorts], [Arg|Args]):-
 generateGroundFluent(FluentName, GroundFluent):-
 	fluent(FluentName, ArgumentSorts, _Values),
 	groundArguments(ArgumentSorts, Arguments),
+	uniqueArguments(Arguments),
 	GroundFluent =.. [FluentName|Arguments].
 
 

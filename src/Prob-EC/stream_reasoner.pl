@@ -6,9 +6,9 @@ performFullER:-
   initDynamic,
   findall(FluentName, fluent(FluentName, _, _), FluentNames), 
   findDependencies(FluentNames, FluentsOrdered), 
-  %getInitially(FluentsOrdered, FirstTimepoint), % Assert the initial values of fluents.
-  %allVessels(Vessels), % Get all the vessels of the input dataset.
-  %allVesselTuples(Tuples), % Get all the vessels that `meet' as tuples.
+  debugprint(FluentsOrdered),
+  % Grounding before retrieving initial values is impossible since dynamic entities have not been asserted.
+  % getInitially(FluentsOrdered, FirstTimepoint), % Assert the initial values of fluents.
   eventRec(FirstTimepoint, FluentsOrdered).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -42,33 +42,38 @@ eventRec(Timepoint, Fluents):-
 recAllFluents(_Timepoint, []).
 
 recAllFluents(Timepoint, [Fluent|RestFluents]):-
-  fluent(Fluent, _ArgSorts, Values),
-  \+ generateGroundFluent(Fluent, GroundFluent),
-  recAllFluents(Timepoint, RestFluents).
+  findall(GroundFluent, generateGroundFluent(Fluent, GroundFluent), GroundFluents),
+  GroundFluents=[].
 
-recAllFluents(Timepoint, [Fluent|RestFluents]):- 
+recAllFluents(Timepoint, [Fluent|RestFluents]):-
+  findall(GroundFluent, generateGroundFluent(Fluent, GroundFluent), GroundFluents),
+  GroundFluents\=[],
   fluent(Fluent, _ArgSorts, Values),
-  generateGroundFluent(Fluent, GroundFluent),
-  %writenl('For GroundFluent: ', GroundFluent),
-  recognizeAllValues(GroundFluent, Timepoint, Values),
+  recognizeAllValues(GroundFluents, Timepoint, Values),
   recAllFluents(Timepoint, RestFluents).
 
 %
 % Fluent has been instantiated. Compute its probability for each possible value
 %
-recognizeAllValues(Fluent, T, []).
+recognizeAllValues(_GroundFluents, _T, []).
 
-recognizeAllValues(Fluent, T, [Value|RestValues]):-
-  recognize(Fluent, T, Value),
-  recognizeAllValues(Fluent, T, RestValues).
+recognizeAllValues(GroundFluents, T, [Value|RestValues]):-
+  recognizeAllGroundFVPs(GroundFluents, T, Value),
+  recognizeAllValues(GroundFluents, T, RestValues).
 
-recognize(Fluent, T, Value):-
+recognizeAllGroundFVPs([], _T, _Value).
+
+recognizeAllGroundFVPs([GroundFluent|Rest], T, Value):-
+  recognize(GroundFluent, T, Value),
+  recognizeAllGroundFVPs(Rest, T, Value).
+
+recognize(GroundFluent, T, Value):-
   nextTimepoint(T, Tnext),
-  subquery(holdsAt(Fluent = Value , Tnext), P),
-  subquery(cached(holdsAt(Fluent = Value)), Pcached),
+  subquery(holdsAt(GroundFluent = Value , Tnext), P),
+  subquery(cached(holdsAt(GroundFluent = Value)), Pcached),
   Pdiff is abs(P-Pcached),
   ((Pdiff>0.01, 
-  writenl(P, '::holdsAt(', Fluent, '=', Value, ',', Tnext, ').'),
-  retractall(cached(holdsAt(Fluent = Value))), 
-  assertz((P::cached(holdsAt(Fluent = Value)))));
+  writenl(P, '::holdsAt(', GroundFluent, '=', Value, ',', Tnext, ').'),
+  retractall(cached(holdsAt(GroundFluent = Value))), 
+  assertz((P::cached(holdsAt(GroundFluent = Value)))));
   Pdiff =< 0.01).

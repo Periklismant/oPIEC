@@ -8,6 +8,6 @@ load_event_description:-
 	%assertFirstTimepoint,
 	['event_description/rules'],
 	['event_description/declarations'],
-	['event_description/hierarchy'],
-	['datasets/initialProbabilities'],
-	assertInitialProbabilities.
+	['event_description/hierarchy'].
+	%['datasets/initialProbabilities'],
+	%assertInitialProbabilities.

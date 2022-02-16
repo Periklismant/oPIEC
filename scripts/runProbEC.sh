@@ -3,7 +3,7 @@
 # Currently supported applications: "caviar", "maritime"
 
 applicationName="maritime" #"caviar"
-streamFileName="Brest_short"
+streamFileName="Brest_10000_one_day"
 loader="../../applications/${applicationName}/loader.pl"
 stream="../../applications/${applicationName}/datasets/Brest_with_noise_preprocessed/${streamFileName}.pl"
 
