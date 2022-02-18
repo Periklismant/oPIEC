@@ -31,3 +31,11 @@ moveDist(34).
 meetDist(34).
 interactDist(25).
 leaveDist(30).
+
+dist(X):- browseDist(X).
+dist(X):- fightDist(X).
+dist(X):- moveDist(X).
+dist(X):- meetDist(X).
+dist(X):- interactDist(X).
+dist(X):- leaveDist(X).
+

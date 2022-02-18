@@ -1,13 +1,13 @@
 %--------- dynamic entities -----------------%
-%% Persons are asserted/retracted depending on window information.
-dynamicEntity(person, 1).
+%% ids are asserted/retracted depending on window information.
+dynamicEntity(id, 1).
+initEntity(id, 1).
 
 % ===== STATE STATICALLY DETERMINED FLUENTS
-sdFluent(distance(_ID1,_ID2)).
-sdFluent(close(_ID1,_ID2,_Threshold)).
-sdFluent(coord(_ID)).
-sdFluent(orientation(_ID)).
-sdFluent(appearance(_ID)).
+%sdFluent(distance(_ID1,_ID2)).
+%sdFluent(close(_ID1,_ID2,_Threshold)).
+%sdFluent(orientation(_ID)).
+%sdFluent(appearance(_ID)).
 
 % ===== SIMPLE FLUENTS
 %simpleFluent(meeting(_ID1,_ID2)).
@@ -17,22 +17,22 @@ sdFluent(appearance(_ID)).
 %simpleFluent(person(_ID)).
 
 %---------------- person -----------------%
-fluent(person, [personID], [true]).
+fluent(person, [id], [true]).
 
 %---------------- distance -----------------%
-fluent(distance, [personID, personID], [true]).
+%fluent(distance, [id, id], [true]).
 
 %---------------- close -----------------%
-fluent(close, [personID, personID, threshold], [true]).
+%fluent(close, [id, id, dist], [true]).
 
 %---------------- fighting -----------------%
-fluent(fighting, [personID, personID], [true]).
+fluent(fighting, [id, id], [true]).
 
 %---------------- meeting -----------------%
-fluent(meeting, [personID, personID], [true]).
+fluent(meeting, [id, id], [true]).
 
 %---------------- moving -----------------%
-fluent(moving, [personID, personID], [true]).
+fluent(moving, [id, id], [true]).
 
 %---------------- leaving_object -----------------%
-fluent(leaving_object, [personID, objectID], [true]).
+fluent(leaving_object, [id, id], [true]).

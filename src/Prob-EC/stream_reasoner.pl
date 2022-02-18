@@ -25,12 +25,22 @@ eventRec(Timepoint, _Fluents):-
 eventRec(Timepoint, Fluents):-
   lastTimepoint(LastTimepoint),
   LastTimepoint>Timepoint,
-  ( %%% Executes all rules defining processTimepoint.
-    processTimepoint(Timepoint),  
-    fail 
-  ; true
-  ),
-  %writenl('Before Rec for Timepoint: ', Timepoint),
+  writenl('Timepoint: ', Timepoint),
+  %debugprint('Timepoint: ', Timepoint),
+  %( %%% Executes all rules defining processTimepoint.
+  %  processTimepoint(Timepoint),  
+  %  fail 
+  %; true
+  %),
+  findall(Timepoint, processTimepoint(Timepoint), TList),
+  %writenl(TList),
+  %debugprint(TList),
+  findall(happensAt(X, T), (happensAt(X, T), writenl(happensAt(X, T))), Events),
+  %writenl(Events),
+  %debugprint(Events),
+  findall(holdsAtIE(X, T), (holdsAtIE(X, T), writenl(holdsAtIE(X, T))), HoldsAtIE),
+  %writenl(HoldsAtIE),
+  %debugprint(HoldsAtIE),
   recAllFluents(Timepoint, Fluents),
   forgetDynamic,
   nextTimepoint(Timepoint, NextTimepoint),
@@ -42,12 +52,12 @@ eventRec(Timepoint, Fluents):-
 recAllFluents(_Timepoint, []).
 
 recAllFluents(Timepoint, [Fluent|RestFluents]):-
-  findall(GroundFluent, generateGroundFluent(Fluent, GroundFluent), GroundFluents),
-  GroundFluents=[].
+  findall(GroundFluent, (subquery(generateGroundFluent(Fluent, GroundFluent), P), P>0), []).
 
 recAllFluents(Timepoint, [Fluent|RestFluents]):-
-  findall(GroundFluent, generateGroundFluent(Fluent, GroundFluent), GroundFluents),
+  findall(GroundFluent, (subquery(generateGroundFluent(Fluent, GroundFluent), P), P>0), GroundFluents),
   GroundFluents\=[],
+  %writenl('Fluent:', Fluent, 'GroundFluents:', GroundFluents),
   fluent(Fluent, _ArgSorts, Values),
   recognizeAllValues(GroundFluents, Timepoint, Values),
   recAllFluents(Timepoint, RestFluents).
@@ -68,6 +78,8 @@ recognizeAllGroundFVPs([GroundFluent|Rest], T, Value):-
   recognizeAllGroundFVPs(Rest, T, Value).
 
 recognize(GroundFluent, T, Value):-
+  %writenl('Recognising:', GroundFluent, Value, 'at', T),
+  %writenl(Fluent),
   nextTimepoint(T, Tnext),
   subquery(holdsAt(GroundFluent = Value , Tnext), P),
   subquery(cached(holdsAt(GroundFluent = Value)), Pcached),

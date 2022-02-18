@@ -1,40 +1,35 @@
-% ===== STATE STATICALLY DETERMINED FLUENTS
-sdFluent(distance(_ID1,_ID2)).
-sdFluent(close(_ID1,_ID2,_Threshold)).
-sdFluent(coord(_ID)).
-sdFluent(orientation(_ID)).
-sdFluent(appearance(_ID)).
-
-% ===== SIMPLE FLUENTS
-simpleFluent(meeting(_ID1,_ID2)).
-simpleFluent(fighting(_ID1,_ID2)).
-simpleFluent(moving(_ID1,_ID2)).
-simpleFluent(leaving_object(_ID1,_ID2)).
-simpleFluent(person(_ID)).
-
+%% These rules also consider the "abrupt" event.
 
 % ===== DEFINE STATICALLY DETERMINED FLUENTS
 
 % close/3
-
-holdsAt(close(Person1, Person2, Threshold) = true, T) :-
-    holdsAt(distance(Person1,Person2)=Dist, T),
-    Dist =< Threshold.
-
-holdsAt(close(Person1, Person2, Threshold) = false, T) :-
-    holdsAt(distance(Person1,Person2)=Dist, T),
-    Dist > Threshold.
-
-holdsAt( distance(Person1, Person2) = Ypot, T ) :-
-    holdsAt( coord(Person1) = (X1, Y1), T ),
-    holdsAt( coord(Person2) = (X2, Y2), T ),
+%% distance definition integrated in the rules of close.
+holdsAtMacro(close(Person1, Person2, Threshold) = true, T) :-
+    holdsAtIE( coord(Person1) = (X1, Y1), T ),
+    %writeln('Person1:', Person1),
+    holdsAtIE( coord(Person2) = (X2, Y2), T ),
+    %writeln('Person2:', Person2),
     \+ Person1 = Person2,
     XDiff is abs(X1-X2),
     YDiff is abs(Y1-Y2),
     SideA is XDiff*XDiff,
     SideB is YDiff*YDiff,
     Temp is SideA + SideB,
-    Ypot is sqrt(Temp).
+    Dist is sqrt(Temp),
+    %writeln('Dist:', Dist),
+    Dist =< Threshold.
+
+holdsAtMacro(close(Person1, Person2, Threshold) = false, T) :-
+    holdsAtIE( coord(Person1) = (X1, Y1), T ),
+    holdsAtIE( coord(Person2) = (X2, Y2), T ),
+    \+ Person1 = Person2,
+    XDiff is abs(X1-X2),
+    YDiff is abs(Y1-Y2),
+    SideA is XDiff*XDiff,
+    SideB is YDiff*YDiff,
+    Temp is SideA + SideB,
+    Dist is sqrt(Temp),
+    Dist > Threshold.
 
 initiatedAt( person(Id)=true, T ) :-
    happensAt( walking(Id), T),
@@ -63,10 +58,19 @@ initiatedAt( person(Id)=false, T) :-
 % ----- initiate fighting
 
 initiatedAt(fighting(Person, Person2) = true, T):-
+    happensAt(abrupt(Person), T), % This proves that Person is a person.
+    cached(holdsAt(person(Person2) = true, T)),
+    fightDist(Dist),
+    holdsAtMacro(close(Person, Person2, Dist) = true, T),
+    \+ happensAt( inactive(Person2), T),
+    \+ happensAt(disappear(Person), T),
+    \+ happensAt(disappear(Person2), T).
+
+/*
+initiatedAt(fighting(Person, Person2) = true, T):-
     happensAt(running(Person), T),
     fightDist(Dist),
     cached(holdsAt(close(Person, Person2, Dist) = true)),
-    %negate(happensAt(inactive(Person2), T)),
     \+ happensAt(inactive(Person2), T),
     \+ happensAt(disappear(Person), T),
     \+ happensAt(disappear(Person2), T).
@@ -76,34 +80,32 @@ initiatedAt(fighting(Person, Person2) = true, T):-
     happensAt(active(Person), T),
     fightDist(Dist),
     cached(holdsAt(close(Person, Person2, Dist) = true)),
-    %negate(happensAt(inactive(Person2), T)),
-    %negate(happensAt(running(Person2), T)),
     \+ happensAt(inactive(Person2), T),
     \+ happensAt(running(Person2), T),
     \+ happensAt(disappear(Person), T),
     \+ happensAt(disappear(Person2), T).
-
+*/
 % ----- terminate fighting: split up
 
 initiatedAt(fighting(Person, Person2) = false, T):-
     happensAt(walking(Person), T),
     fightDist(Dist),
-    cached(holdsAt(close(Person, Person2, Dist) = false)).
+    holdsAtMacro(close(Person, Person2, Dist) = false).
 
 initiatedAt(fighting(Person2, Person) = false, T):-
     happensAt(walking(Person), T),
     fightDist(Dist),
-    cached(holdsAt(close(Person, Person2, Dist) = false)).
+    holdsAtMacro(close(Person, Person2, Dist) = false).
 
 initiatedAt(fighting(Person, Person2) = false, T):-
     happensAt(running(Person), T),
     fightDist(Dist),
-    cached(holdsAt(close(Person, Person2, Dist) = false)).
+    holdsAtMacro(close(Person, Person2, Dist) = false).
 
 initiatedAt(fighting(Person2, Person) = false, T):-
     happensAt(running(Person), T),
     fightDist(Dist),
-    cached(holdsAt(close(Person, Person2, Dist) = false)).
+    holdsAtMacro(close(Person, Person2, Dist) = false).
 
 initiatedAt(fighting(Person, _) = false, T):-
     happensAt(disappear(Person), T).
@@ -123,24 +125,23 @@ initiatedAt(fighting(_, Person) = false, T):-
 
 initiatedAt(meeting(Person, Person2) = true, T):-
     happensAt(active(Person), T),
-    interactDist(Dist),
-    holdsAt(close(Person, Person2, Dist) = true, T),
     cached(holdsAt(person(Person2) = true)),
-    %negate(happensAt(running(Person2), T)),
+    interactDist(Dist),
+    holdsAtMacro(close(Person, Person2, Dist) = true, T),
+    \+ happensAt(abrupt(Person2), T),
     \+ happensAt(running(Person2), T),
     \+ happensAt(disappear(Person), T),
     \+ happensAt(disappear(Person2), T).
 
 initiatedAt(meeting(Person, Person2) = true, T):-
-    cached(holdsAt(person(Person) = true)),
     happensAt(inactive(Person), T),
-    interactDist(Dist),
-    holdsAt(close(Person, Person2, Dist) = true, T),
+    cached(holdsAt(person(Person) = true)),
     cached(holdsAt(person(Person2) = true)),
-    %negate(happensAt(running(Person2), T)),
-    %negate(happensAt(active(Person2), T)),
+    interactDist(Dist),
+    holdsAtMacro(close(Person, Person2, Dist) = true, T),
     \+ happensAt(running(Person2), T),
     \+ happensAt(active(Person2), T),
+    \+ happensAt(abrupt(Person2), T),
     \+ happensAt(disappear(Person), T),
     \+ happensAt(disappear(Person2), T).
 
@@ -149,18 +150,24 @@ initiatedAt(meeting(Person, Person2) = true, T):-
 initiatedAt(meeting(Person, Person2) = false, T):-
     happensAt(walking(Person), T),
     meetDist(Dist),
-    holdsAt(close(Person, Person2, Dist) = false, T).
+    holdsAtMacro(close(Person, Person2, Dist) = false, T).
 
 initiatedAt(meeting(Person2, Person) = false, T):-
     happensAt(walking(Person), T),
     meetDist(Dist),
-    holdsAt(close(Person, Person2, Dist) = false, T).
+    holdsAtMacro(close(Person, Person2, Dist) = false, T).
 
 initiatedAt(meeting(Person, _) = false, T):-
     happensAt(running(Person), T).
 
 initiatedAt(meeting(_, Person) = false, T):-
     happensAt(running(Person), T).
+
+initiatedAt(meeting(Person, _) = false, T):-
+    happensAt(abrupt(Person), T).
+
+initiatedAt(meeting(_, Person) = false, T):-
+    happensAt(abrupt(Person), T).
 
 initiatedAt(meeting(Person, _) = false, T):-
     happensAt(disappear(Person), T).
@@ -180,12 +187,12 @@ initiatedAt(meeting(_, Person) = false, T):-
 initiatedAt(moving(Person, Person2) = true, T):-
     happensAt(walking(Person), T),
     moveDist( Dist ),
-    holdsAt(close(Person, Person2, Dist)=true, T),
+    holdsAtMacro(close(Person, Person2, Dist)=true, T),
     happensAt( walking(Person2), T ), % This will be enough to prove that Person2 is a person entity as well.
     \+ happensAt(disappear(Person), T),
     \+ happensAt(disappear(Person2), T),
-    holdsAt(orientation(Person)=O, T),
-    holdsAt(orientation(Person2)=O2, T),
+    holdsAtIE(orientation(Person)=O, T),
+    holdsAtIE(orientation(Person2)=O2, T),
     Diff is abs(O-O2),
     Diff < 45.
 
@@ -194,12 +201,12 @@ initiatedAt(moving(Person, Person2) = true, T):-
 initiatedAt(moving(Person, Person2) = false, T):-
     happensAt(walking(Person), T),
     moveDist( Dist ),
-    holdsAt(close(Person, Person2, Dist)=false, T).
+    holdsAtMacro(close(Person, Person2, Dist)=false, T).
 
 initiatedAt(moving(Person2, Person) = false, T):-
     happensAt(walking(Person), T),
     moveDist( Dist ),
-    holdsAt(close(Person, Person2, Dist)=false, T).
+    holdsAtMacro(close(Person, Person2, Dist)=false, T).
 
 % ----- terminate moving: stop moving
 
@@ -227,6 +234,14 @@ initiatedAt(moving(Person, _) = false, T):-
 initiatedAt(moving(_, Person) = false, T):-
     happensAt(running(Person), T).
 
+% ----- terminate moving: abrupt motion
+
+initiatedAt(moving(Person, _) = false, T):-
+    happensAt(abrupt(Person), T).
+
+initiatedAt(moving(_, Person) = false, T):-
+    happensAt(abrupt(Person), T).
+
 initiatedAt(moving(Person, _) = false, T):-
     happensAt(disappear(Person), T).
 
@@ -242,9 +257,9 @@ initiatedAt(moving(_, Person) = false, T):-
 
 initiatedAt(leaving_object(Person, Object) = true, T):-
     happensAt(inactive(Object), T),
-    holdsAt(appearance(Object) = appear, T),
+    holdsAtIE(appearance(Object) = appear, T),
     leaveDist( Dist ),
-    cached(holdsAt(close(Person, Object, Dist)=true)),
+    holdsAtMacro(close(Person, Object, Dist)=true),
     cached(holdsAt(person(Person)=true)).
 
 % ----- terminate leaving_object: pick up object
@@ -259,7 +274,7 @@ initiatedAt(leaving_object(_, Object) = false, T):-
 % ====================================
 
 happensAt(appear(ID), T):-
-    holdsAt(appearance(ID) = appear, T).
+    holdsAtIE(appearance(ID) = appear, T).
 
 happensAt(disappear(ID), T):-
-    holdsAt(appearance(ID) = disappear, T).
+    holdsAtIE(appearance(ID) = disappear, T).

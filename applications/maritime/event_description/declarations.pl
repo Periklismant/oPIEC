@@ -1,6 +1,7 @@
 %--------- dynamic entities -----------------%
 %% Vessels are asserted/retracted depending on window information.
 dynamicEntity(vessel, 1).
+initEntity(vessel, 1).
 
 %----------------area types -----------------%
 area(anchorage).

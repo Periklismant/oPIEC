@@ -2,8 +2,13 @@
 
 %
 dynamicEntity(happensAt, 2). % Retract all happensAt facts after each window.
+dynamicEntity(holdsAtIE, 2). % Retract all holdsAtIE facts after each window.
+
+initEntity(happensAt, 2).
+initEntity(holdsAtIE, 2).
 initEntity(cached, 1).
 initEntity(sdFluent, 1).
+initEntity(sdMacro, 1).
 
 initDynamic:-
 	(
@@ -17,21 +22,32 @@ initDynamic:-
 		true
 	).
 forgetDynamic:-
-	(
-		dynamicEntity(Type, ArgNo),
-		length(ArgList, ArgNo),
-		Instance =..[Type|ArgList],
-		retractall(Instance),
-		findall(X, vessel(X), Vessels),
-		fail
-	;
-		true
-	).
+	findall(Instance, 
+			(dynamicEntity(Type, ArgNo),
+			length(ArgList, ArgNo),
+			Instance =..[Type|ArgList],
+			retractall(Instance)), List),
+	writenl(List).
+	%(
+	%	dynamicEntity(Type, ArgNo),
+	%	length(ArgList, ArgNo),
+	%	Instance =..[Type|ArgList],
+	%	retractall(Instance),
+	%	fail
+	%;
+	%	true
+	%).
+
+member0(X, [X|T]).
+
+member0(X, [H|T]):-
+	X\=H,
+	member0(X, T).
 
 uniqueArguments([]).
 
 uniqueArguments([H|T]):-
-	\+ member(H, T), 
+	\+ member0(H, T), 
 	uniqueArguments(T).	
 
 % Generate valid grounding. 
@@ -45,7 +61,7 @@ groundArguments([ArgSort|Sorts], [Arg|Args]):-
 generateGroundFluent(FluentName, GroundFluent):-
 	fluent(FluentName, ArgumentSorts, _Values),
 	groundArguments(ArgumentSorts, Arguments),
-	uniqueArguments(Arguments),
+	subquery(uniqueArguments(Arguments), P), P>0,
 	GroundFluent =.. [FluentName|Arguments].
 
 
@@ -68,16 +84,48 @@ getInitialValues(FluentName, [Value|RestValues], Tstart):-
 	writenl(P,'::holdsAt(',GroundFluent,'=',Value,',',Tstart,').'),
 	getInitialValues(FluentName, RestValues, Tstart).
 
-/*
-getInitialValues(Fluent, _Values, _T):-
-	relational(Fluent), 
-	\+meet(Vessel1, Vessel2).
+%------- Fluent Hierarchy -------%
+%------ Find Path to Target CEs ------%
+%TargetEvents ---> List of events user want to compute
+%RequiredEvents ---> List of event dependencies of target events
 
-getInitialValues(Fluent, [Value|RestValues], Tstart):-
-	((Fluent=withinArea, vessel(Vessel), isArea(Area), FluentParams =.. [Fluent, Vessel, Area]); 
-	(relational(Fluent), meet(Vessel1, Vessel2), FluentParams =.. [Fluent, Vessel1, Vessel2]);
-	(\+Fluent=withinArea, \+relational(Fluent), vessel(Vessel), FluentParams =.. [Fluent, Vessel])),
-	subquery(cached(holdsAt(FluentParams = Value)), P),
-	writenl(P, "::holdsAt(", FluentParams, "=", Value, ", ", Tstart, ")."),
-	getInitialValues(Fluent, RestValues, Tstart).
-*/
+eventDependencies(Event, L):-
+	findall(X, dependency(X, Event), L).
+
+member1(X,[H|_]) :- X=H,!.
+member1(X,[_|T]) :- member1(X,T).
+ 
+distinct([],[]).
+distinct([H|T],C) :- member1(H,T),!, distinct(T,C).
+distinct([H|T],[H|C]) :- distinct(T,C).
+
+deleteDuplicates([], UniqueEvents, UniqueEvents).
+
+deleteDuplicates([Event|RestEvents], FoundList, UniqueEvents):-
+	((member(Event, FoundList), NewFound=FoundList); 
+	(\+member(Event, FoundList), append(FoundList, [Event], NewFound))),
+	deleteDuplicates(RestEvents, NewFound, UniqueEvents).
+
+traverseDependecies([], Result, Result).
+
+traverseDependecies([Event|RestEvents], Buffer, Result):-
+	append([Event], Buffer, Buffer1),
+	eventDependencies(Event, NextLevel),
+	NextLevel=[],
+	traverseDependecies(RestEvents, Buffer1, Result).
+
+traverseDependecies([Event|RestEvents], Buffer, Result):-
+	append([Event], Buffer, Buffer1),
+	eventDependencies(Event, NextLevel),
+	\+NextLevel=[],
+	append(NextLevel, RestEvents, NewEvents),
+	traverseDependecies(NewEvents, Buffer1, Result).
+
+findDependencies(Events, RequiredEvents):-
+	traverseDependecies(Events, [], ListOfDependencies),
+	deleteDuplicates(ListOfDependencies, [], RequiredEvents).
+ 	
+ %%% 
+emptyCache:-
+	retractall(cached(_)),
+	forgetDynamic. 

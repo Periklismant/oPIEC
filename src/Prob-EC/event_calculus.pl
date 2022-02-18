@@ -1,12 +1,12 @@
 holdsAt(F=V,T):-
   \+ sdFluent(F),
   cached(holdsAt(F=V)),
-  Tprev is T - 1,
+  prevTimepoint(T, Tprev),
   \+ broken(F=V, Tprev).
 
 holdsAt(F=V,T):-
   \+ sdFluent(F),
-  Tprev is T - 1,
+  prevTimepoint(T, Tprev),
   initiatedAt(F=V,Tprev).
 
 broken(F=V1, T):-
