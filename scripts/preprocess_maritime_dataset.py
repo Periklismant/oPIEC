@@ -30,6 +30,41 @@ def fix_proximity(inputFilePath):
 	return
 
 
+def checkVesselsInLine(vessels, line):
+	for vessel in vessels:
+		if vessel in line:
+			return True
+	return False
+
+def filterVessels(file, vessels):
+	parent_path = '../applications/maritime/datasets/Brest_with_noise_preprocessed/'
+	f=open(parent_path + file + '.pl', "r")
+	fw=open(parent_path + file + "_filtered.pl", "w")
+	for line in f:
+		if len(line)==1 or "processTimepoint" in line or checkVesselsInLine(vessels, line):
+			fw.write(line)
+		elif line[-2]==".":
+			fw.write("true.\n")
+	f.close()
+	fw.close()
+	fAgain=open(parent_path + file + "_filtered.pl", "r")
+	fwAgain=open(parent_path + file + "_filtered2.pl", "w")
+	prevline=""
+	for line in fAgain:
+		if "true." in line and "processTimepoint" in prevline:
+			prevline=line
+			continue
+		elif "processTimepoint" in prevline:
+			fwAgain.write(prevline)
+			fwAgain.write(line)
+		elif "processTimepoint" not in line and line!="\n":
+			fwAgain.write(line)
+		prevline=line
+	fAgain.close()
+	fwAgain.close()
+	return 
+
+
 # output: [eventName, timepoint, ArgumentsList, happensAtString].
 def processLine(line):
 	event, prob = line.strip().split(':')
@@ -62,7 +97,7 @@ def processLine(line):
 	else: 
 		return []
 
-def get_prolog_facts(inputFile, outputFile, timepointsThreshold=-1):
+def get_prolog_facts(inputFile, outputFile, timepointsThreshold=-1, inputVessels="all"):
 	'''Transforms maritime dataset into probabilistic facts with the appropriate ProbLog format.
 	   The events occuring in each time-point are grouped into rules to facilitate the incremental assertions and retractions required for stream reasoning.'''
 	inputFilePath = '../applications/maritime/datasets/Brest_with_noise_original/' + inputFile 
@@ -123,4 +158,6 @@ def get_prolog_facts(inputFile, outputFile, timepointsThreshold=-1):
 	fw.close()
 
 # sys.argv = [$inputFileName, $outputFileName, $outputDatasetSizeInSeconds]
-get_prolog_facts(sys.argv[1], sys.argv[2], int(sys.argv[3]))
+vessels = ["227574020", "227705102"]
+#get_prolog_facts(sys.argv[1], sys.argv[2], int(sys.argv[3])*86400)
+filterVessels(sys.argv[2], vessels)

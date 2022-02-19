@@ -25,7 +25,7 @@ eventRec(Timepoint, _Fluents):-
 eventRec(Timepoint, Fluents):-
   lastTimepoint(LastTimepoint),
   LastTimepoint>Timepoint,
-  writenl('Timepoint: ', Timepoint),
+  %writenl('Timepoint: ', Timepoint),
   %debugprint('Timepoint: ', Timepoint),
   %( %%% Executes all rules defining processTimepoint.
   %  processTimepoint(Timepoint),  
@@ -35,10 +35,10 @@ eventRec(Timepoint, Fluents):-
   findall(Timepoint, processTimepoint(Timepoint), TList),
   %writenl(TList),
   %debugprint(TList),
-  findall(happensAt(X, T), (happensAt(X, T), writenl(happensAt(X, T))), Events),
+  %findall(happensAt(X, T), (happensAt(X, T), writenl(happensAt(X, T))), Events),
   %writenl(Events),
   %debugprint(Events),
-  findall(holdsAtIE(X, T), (holdsAtIE(X, T), writenl(holdsAtIE(X, T))), HoldsAtIE),
+  %findall(holdsAtIE(X, T), (holdsAtIE(X, T), writenl(holdsAtIE(X, T))), HoldsAtIE),
   %writenl(HoldsAtIE),
   %debugprint(HoldsAtIE),
   recAllFluents(Timepoint, Fluents),

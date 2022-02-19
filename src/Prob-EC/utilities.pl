@@ -26,8 +26,8 @@ forgetDynamic:-
 			(dynamicEntity(Type, ArgNo),
 			length(ArgList, ArgNo),
 			Instance =..[Type|ArgList],
-			retractall(Instance)), List),
-	writenl(List).
+			retractall(Instance)), List). %% does it really retract?
+	%writenl(List).
 	%(
 	%	dynamicEntity(Type, ArgNo),
 	%	length(ArgList, ArgNo),
