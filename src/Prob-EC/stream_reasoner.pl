@@ -6,7 +6,7 @@ performFullER:-
   initDynamic,
   findall(FluentName, fluent(FluentName, _, _), FluentNames), 
   findDependencies(FluentNames, FluentsOrdered), 
-  debugprint(FluentsOrdered),
+  %debugprint(FluentsOrdered),
   % Grounding before retrieving initial values is impossible since dynamic entities have not been asserted.
   % getInitially(FluentsOrdered, FirstTimepoint), % Assert the initial values of fluents.
   eventRec(FirstTimepoint, FluentsOrdered).
@@ -27,6 +27,7 @@ eventRec(Timepoint, Fluents):-
   LastTimepoint>Timepoint,
   %writenl('Timepoint: ', Timepoint),
   %debugprint('Timepoint: ', Timepoint),
+  %debugprint('Fluents: ', Fluents),
   %( %%% Executes all rules defining processTimepoint.
   %  processTimepoint(Timepoint),  
   %  fail 
@@ -52,12 +53,13 @@ eventRec(Timepoint, Fluents):-
 recAllFluents(_Timepoint, []).
 
 recAllFluents(Timepoint, [Fluent|RestFluents]):-
-  findall(GroundFluent, (subquery(generateGroundFluent(Fluent, GroundFluent), P), P>0), []).
+  findall(GroundFluent, (subquery(generateGroundFluent(Fluent, GroundFluent), P), P>0), []),
+  recAllFluents(Timepoint, RestFluents).
 
 recAllFluents(Timepoint, [Fluent|RestFluents]):-
   findall(GroundFluent, (subquery(generateGroundFluent(Fluent, GroundFluent), P), P>0), GroundFluents),
   GroundFluents\=[],
-  %writenl('Fluent:', Fluent, 'GroundFluents:', GroundFluents),
+  %debugprint('Fluent:', Fluent, 'GroundFluents:', GroundFluents),
   fluent(Fluent, _ArgSorts, Values),
   recognizeAllValues(GroundFluents, Timepoint, Values),
   recAllFluents(Timepoint, RestFluents).
@@ -78,8 +80,7 @@ recognizeAllGroundFVPs([GroundFluent|Rest], T, Value):-
   recognizeAllGroundFVPs(Rest, T, Value).
 
 recognize(GroundFluent, T, Value):-
-  %writenl('Recognising:', GroundFluent, Value, 'at', T),
-  %writenl(Fluent),
+  %debugprint('Recognising:', GroundFluent, Value, 'at', T),
   nextTimepoint(T, Tnext),
   subquery(holdsAt(GroundFluent = Value , Tnext), P),
   subquery(cached(holdsAt(GroundFluent = Value)), Pcached),

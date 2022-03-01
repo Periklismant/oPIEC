@@ -1,11 +1,11 @@
 holdsAt(F=V,T):-
-  \+ sdFluent(F),
+  \+ isSDFluent(F),
   cached(holdsAt(F=V)),
   prevTimepoint(T, Tprev),
   \+ broken(F=V, Tprev).
 
 holdsAt(F=V,T):-
-  \+ sdFluent(F),
+  \+ isSDFluent(F),
   prevTimepoint(T, Tprev),
   initiatedAt(F=V,Tprev).
 

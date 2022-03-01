@@ -7,8 +7,8 @@ dynamicEntity(holdsAtIE, 2). % Retract all holdsAtIE facts after each window.
 initEntity(happensAt, 2).
 initEntity(holdsAtIE, 2).
 initEntity(cached, 1).
-initEntity(sdFluent, 1).
-initEntity(sdMacro, 1).
+%initEntity(sdFluent, 1).
+%initEntity(sdMacro, 1).
 
 initDynamic:-
 	(
@@ -129,3 +129,7 @@ findDependencies(Events, RequiredEvents):-
 emptyCache:-
 	retractall(cached(_)),
 	forgetDynamic. 
+
+isSDFluent(GroundFluent):-
+	GroundFluent =.. [Fluent|_], 
+	sdFluent(Fluent).

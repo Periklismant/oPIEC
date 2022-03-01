@@ -1,0 +1,8 @@
+0.8 ::holdsAt( rich(chris) = true , 2 ).
+0.6 ::holdsAt( location(chris) = pub , 3 ).
+0.48 ::holdsAt( happy(chris) = true , 3 ).
+0.48 ::holdsAt( rich(chris) = true , 4 ).
+0.288 ::holdsAt( happy(chris) = true , 4 ).
+0.48 ::holdsAt( location(chris) = pub , 5 ).
+0.2304 ::holdsAt( happy(chris) = true , 5 ).
+
