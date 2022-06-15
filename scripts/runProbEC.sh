@@ -3,12 +3,17 @@
 # Currently supported applications: "caviar", "maritime"
 
 applicationName="maritime" # "caviar" or "maritime"
-streamFileName="Brest_with_noise_preprocessed/Brest_one_month_twoV_filtered2" #"original_smooth_1.0" #"Brest_with_noise_preprocessed/Brest_10000_one_day"
-loader="../../applications/${applicationName}/loader.pl"
-stream="../../applications/${applicationName}/datasets/${streamFileName}.pl"
+streamFileNamePrefix="Brest_with_noise_preprocessed/Brest_" #"original_smooth_1.0" #"Brest_with_noise_preprocessed/Brest_10000_one_day"
+#eventNos=(250 500 1000 2000)
+for eventNo in $1 #250 #500 1000 2000
+do 
+	streamFileName=${streamFileNamePrefix}${eventNo}_filtered2
+	resultFileName=${applicationName}_${eventNo}
+	echo $streamFileName
+	loader="../../applications/${applicationName}/loader.pl" #loader-no-caching.pl"
+	stream="../../applications/${applicationName}/datasets/${streamFileName}.pl"
 
-problog ../src/Prob-EC/probec.pl -a ${loader} -a ${stream} > ${applicationName}.result
-#./fixoutput.sh ".." "meeting,moving" "true,true" ${fileName} &&
-#cd ../src/oPIEC-python/ &&
-#python oPIEC.py ${fileName}_meeting_true && # Execute oPIEC for both events.
-#python oPIEC.py ${fileName}_moving_true 
+	time problog ../src/Prob-EC/probec.pl -a ${loader} -a ${stream}  > ${resultFileName}.result
+	sed -i 's/"//g; s/ //g' ${resultFileName}.result 
+	python3 cut_decimals.py ${resultFileName}.result ${resultFileName}-comp.result
+done

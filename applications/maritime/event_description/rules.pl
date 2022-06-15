@@ -50,7 +50,7 @@ initiatedAt(stopped(Vessel)=false, T) :-
 initiatedAt(lowSpeed(Vessel)=true, T) :-  
     happensAt(slow_motion_start(Vessel), T).
 
-terminatedAt(lowSpeed(Vessel)=true, T) :-
+initiatedAt(lowSpeed(Vessel)=false, T) :-
     happensAt(slow_motion_end(Vessel), T).
 
 initiatedAt(lowSpeed(Vessel)=false, T) :-
@@ -75,8 +75,10 @@ initiatedAt(changingSpeed(Vessel)=false, T) :-
 %------------ highSpeedNearCoast -------------%
 initiatedAt(highSpeedNearCoast(Vessel)=true, T):-
     happensAt(velocity(Vessel, Speed, _, _), T),
+    %subquery(happensAt(velocity(Vessel, Speed, _, _), T), P2), writeln(P2),
     thresholds(hcNearCoastMax, HcNearCoastMax),
     Speed > HcNearCoastMax,
+    %subquery( cached(holdsAt(withinArea(Vessel, nearCoast)=true)), P), writeln(P),  
     cached(holdsAt(withinArea(Vessel, nearCoast)=true)).
 
 initiatedAt(highSpeedNearCoast(Vessel)=false, T):-
@@ -121,15 +123,6 @@ initiatedAt(movingSpeed(Vessel)=false, T) :-
 initiatedAt(movingSpeed(Vessel)=false, T) :-
     initiatedAt(gap(Vessel)=farFromPorts, T).
 
-%----------------- underWay ------------------% 
-holdsAt(underWay(Vessel)=true, T):-
-    cached(holdsAt(movingSpeed(Vessel)=below)).
-
-holdsAt(underWay(Vessel)=true, T):-
-    cached(holdsAt(movingSpeed(Vessel)=normal)).
-
-holdsAt(underWay(Vessel)=true, T):-
-    cached(holdsAt(movingSpeed(Vessel)=above)).
 
 %----------------- drifting ------------------%
 initiatedAt(drifting(Vessel)=true, T) :-
@@ -152,17 +145,10 @@ initiatedAt(drifting(Vessel)=false, T) :-
 initiatedAt(drifting(Vessel)=false, T) :-
     initiatedAt(underWay(Vessel)=false, T).
 
-%-------------- anchoredOrMoored ---------------%
-holdsAt(anchoredOrMoored(Vessel)=true, T) :-
-    cached(holdsAt(stopped(Vessel)=farFromPorts)),
-    cached(holdsAt(withinArea(Vessel, anchorage)=true)).    
-
-holdsAt(anchoredOrMoored(Vessel)=true, T) :-
-    cached(holdsAt(stopped(Vessel)=nearPorts)).
 
 %---------------- tuggingSpeed ----------------%
 initiatedAt(tuggingSpeed(Vessel)=true , T) :-
-    happensAt(velocity(Vessel, Speed, _, _), T),
+    happensAt(velocity(Vessel, Speed, _X, _Y), T),
     thresholds(tuggingMin, TuggingMin),
     thresholds(tuggingMax, TuggingMax),
     Speed >= TuggingMin,
@@ -170,12 +156,18 @@ initiatedAt(tuggingSpeed(Vessel)=true , T) :-
 
 initiatedAt(tuggingSpeed(Vessel)=false , T) :-
     happensAt(velocity(Vessel, Speed, _, _), T),
-    thresholds(tuggingMin, TuggingMin),
     thresholds(tuggingMax, TuggingMax),
-    (Speed > TuggingMax; Speed < TuggingMin).
+    Speed > TuggingMax. 
 
 initiatedAt(tuggingSpeed(Vessel)=false , T) :-
-    happensAt(start(gap(Vessel)=_Status), T).
+    happensAt(velocity(Vessel, Speed, _, _), T),
+    thresholds(tuggingMin, TuggingMin),
+    Speed < TuggingMin.
+
+initiatedAt(tuggingSpeed(Vessel)=false , T) :-
+    initiatedAt(gap(Vessel)=nearPorts, T).
+initiatedAt(tuggingSpeed(Vessel)=false , T) :-
+    initiatedAt(gap(Vessel)=farFromPorts, T).
 
 %--------------- proximity ------------------%
 initiatedAt(proximity(Vessel1, Vessel2)=true, T):-
@@ -184,43 +176,61 @@ initiatedAt(proximity(Vessel1, Vessel2)=true, T):-
 initiatedAt(proximity(Vessel1, Vessel2)=false, T):-
     happensAt(proximity_end(Vessel1, Vessel2), T).
 
+%----------------- underWay ------------------% 
+holdsAt(underWay(Vessel)=true, T):-
+    holdsAt(movingSpeed(Vessel)=below, T).
+
+holdsAt(underWay(Vessel)=true, T):-
+    holdsAt(movingSpeed(Vessel)=normal, T).
+
+holdsAt(underWay(Vessel)=true, T):-
+    holdsAt(movingSpeed(Vessel)=above, T).
+
 %--------------- tugging ------------------%
 holdsAt(tugging(Vessel1, Vessel2)=true, T) :-
-    cached(holdsAt(proximity(Vessel1, Vessel2)=true)),
+    holdsAt(proximity(Vessel1, Vessel2)=true, T),
     oneIsTug(Vessel1, Vessel2),
     \+oneIsPilot(Vessel1, Vessel2),
-    cached(holdsAt(tuggingSpeed(Vessel1)=true)),
-    cached(holdsAt(tuggingSpeed(Vessel2)=true)).
+    holdsAt(tuggingSpeed(Vessel1)=true, T),
+    holdsAt(tuggingSpeed(Vessel2)=true, T).
+
+%-------------- anchoredOrMoored ---------------%
+holdsAt(anchoredOrMoored(Vessel)=true, T) :-
+    holdsAt(stopped(Vessel)=farFromPorts, T),
+    holdsAt(withinArea(Vessel, anchorage)=true, T).    
+
+holdsAt(anchoredOrMoored(Vessel)=true, T) :-
+    holdsAt(stopped(Vessel)=nearPorts, T).
 
 %---------------- rendezVous -----------------%
 holdsAt(rendezVous(Vessel1, Vessel2)=true, T):-
     \+ oneIsTug(Vessel1, Vessel2),
     \+ oneIsPilot(Vessel1, Vessel2),
-    cached(holdsAt(proximity(Vessel1, Vessel2)=true)),
-    (cached(holdsAt(lowSpeed(Vessel1)=true)); cached(holdsAt(stopped(Vessel1)=farFromPorts))), 
-    (cached(holdsAt(lowSpeed(Vessel2)=true)); cached(holdsAt(stopped(Vessel2)=farFromPorts))),
-    \+ cached(holdsAt(withinArea(Vessel1, nearPorts)=true)),
-    \+ cached(holdsAt(withinArea(Vessel2, nearPorts)=true)),
-    \+ cached(holdsAt(withinArea(Vessel1, nearCoast)=true)),
-    \+ cached(holdsAt(withinArea(Vessel2, nearCoast)=true)).
+    holdsAt(proximity(Vessel1, Vessel2)=true, T),
+    (holdsAt(lowSpeed(Vessel1)=true, T); holdsAt(stopped(Vessel1)=farFromPorts, T)), 
+    (holdsAt(lowSpeed(Vessel2)=true, T); holdsAt(stopped(Vessel2)=farFromPorts, T)),
+    \+ holdsAt(withinArea(Vessel1, nearPorts)=true, T),
+    \+ holdsAt(withinArea(Vessel2, nearPorts)=true, T),
+    \+ holdsAt(withinArea(Vessel1, nearCoast)=true, T),
+    \+ holdsAt(withinArea(Vessel2, nearCoast)=true, T).
 
 %-------- loitering --------------------------%
 holdsAt(loitering(Vessel)=true, T) :-
-    cached(holdsAt(lowSpeed(Vessel)=true)),
-    \+cached(holdsAt(withinArea(Vessel, nearCoast)=true)),
-    \+cached(holdsAt(anchoredOrMoored(Vessel)=true)).
+    holdsAt(lowSpeed(Vessel)=true, T),
+    holdsAt(withinArea(Vessel, nearCoast)=true, T),
+    \+holdsAt(anchoredOrMoored(Vessel)=true, T).
 
 holdsAt(loitering(Vessel)=true, T) :-
-    cached(holdsAt(stopped(Vessel)=farFromPorts)),
-    \+cached(holdsAt(withinArea(Vessel, nearCoast)=true)),
-    \+cached(holdsAt(anchoredOrMoored(Vessel)=true)).
+    holdsAt(stopped(Vessel)=farFromPorts, T),
+    \+holdsAt(withinArea(Vessel, nearCoast)=true, T),
+    \+holdsAt(anchoredOrMoored(Vessel)=true, T).
 
 %-------- pilotOps ---------------------------%
 holdsAt(pilotBoarding(Vessel1, Vessel2)=true, T):-
     oneIsPilot(Vessel1, Vessel2), 
     \+ oneIsTug(Vessel1, Vessel2),
-    cached(holdsAt(proximity(Vessel1, Vessel2)=true)),
-    (cached(holdsAt(lowSpeed(Vessel1)=true)); cached(holdsAt(stopped(Vessel1)=farFromPorts))), 
-    (cached(holdsAt(lowSpeed(Vessel2)=true)); cached(holdsAt(stopped(Vessel2)=farFromPorts))), 
-    \+ cached(holdsAt(withinArea(Vessel1, nearCoast)=true)),
-    \+ cached(holdsAt(withinArea(Vessel2, nearCoast)=true)).
+    holdsAt(proximity(Vessel1, Vessel2)=true, T),
+    (holdsAt(lowSpeed(Vessel1)=true, T); holdsAt(stopped(Vessel1)=farFromPorts, T)), 
+    (holdsAt(lowSpeed(Vessel2)=true, T); holdsAt(stopped(Vessel2)=farFromPorts, T)), 
+    \+ holdsAt(withinArea(Vessel1, nearCoast)=true, T),
+    \+ holdsAt(withinArea(Vessel2, nearCoast)=true, T).

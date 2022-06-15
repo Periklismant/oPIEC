@@ -2,6 +2,8 @@
 %% Vessels are asserted/retracted depending on window information.
 dynamicEntity(vessel, 1).
 initEntity(vessel, 1).
+dynamicEntity(meet, 2).
+initEntity(meet, 2).
 
 %----------------area types -----------------%
 area(anchorage).
@@ -36,14 +38,12 @@ fluent(movingSpeed, [vessel], [below, normal, above]).
 
 %----------------- underWay ------------------% 
 fluent(underWay, [vessel], [true]).
-sdFluent(underWay).
 
 %----------------- drifting ------------------%
 fluent(drifting, [vessel], [true]).
 
 %-------------- anchoredOrMoored ---------------%
 fluent(anchoredOrMoored, [vessel], [true]).
-sdFluent(anchoredOrMoored).
 
 %---------------- tuggingSpeed ----------------%
 fluent(tuggingSpeed, [vessel], [true]).
@@ -53,16 +53,36 @@ fluent(proximity, [vessel, vessel], [true]).
 
 %--------------- tugging ------------------%
 fluent(tugging, [vessel, vessel], [true]).
-sdFluent(tugging).
 
 %---------------- rendezVous -----------------%
 fluent(rendezVous, [vessel, vessel], [true]).
-sdFluent(rendezVous).
 
 %-------- loitering --------------------------%
 fluent(loitering, [vessel], [true]).
-sdFluent(loitering).
 
 %-------- pilotOps ---------------------------%
 fluent(pilotBoarding, [vessel, vessel], [true]).
+
+sdFluent(underWay).
+sdFluent(anchoredOrMoored).
+sdFluent(tugging).
+sdFluent(loitering).
+sdFluent(rendezVous).
 sdFluent(pilotBoarding). % TODO: Add sdFluent status information in fluent predicate to avoid missing sdFluent/1 definition error. 
+
+groundFluent(withinArea, withinArea(Vessel, Area)):- vessel(Vessel), area(Area).
+groundFluent(gap, gap(Vessel)):- vessel(Vessel).
+groundFluent(stopped, stopped(Vessel)):- vessel(Vessel).
+groundFluent(lowSpeed, lowSpeed(Vessel)):- vessel(Vessel).
+groundFluent(changingSpeed, changingSpeed(Vessel)):- vessel(Vessel).
+groundFluent(highSpeedNearCoast, highSpeedNearCoast(Vessel)):- vessel(Vessel).
+groundFluent(movingSpeed, movingSpeed(Vessel)):- vessel(Vessel).
+groundFluent(underway, underWay(Vessel)):- vessel(Vessel).
+groundFluent(drifting, drifting(Vessel)):- vessel(Vessel).
+groundFluent(anchoredOrMoored, anchoredOrMoored(Vessel)):- vessel(Vessel).
+groundFluent(tuggingSpeed, tuggingSpeed(Vessel)):- vessel(Vessel).
+groundFluent(proximity, proximity(Vessel1, Vessel2)):- meet(Vessel1, Vessel2).
+groundFluent(tugging, tugging(Vessel1, Vessel2)):- meet(Vessel1, Vessel2).
+groundFluent(rendezVous, rendezVous(Vessel1, Vessel2)):- meet(Vessel1, Vessel2).
+groundFluent(loitering, loitering(Vessel)):- vessel(Vessel).
+groundFluent(pilotBoarding, pilotBoarding(Vessel1, Vessel2)):- meet(Vessel1, Vessel2).

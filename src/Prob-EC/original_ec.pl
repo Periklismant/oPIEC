@@ -1,13 +1,17 @@
 holdsAt(F=V,T):-
   \+ isSDFluent(F),
-  cached(holdsAt(F=V)),
+  T>1443650400,
+  %debugprint('Inertia: ', F=V, ' ', T), nl,
   prevTimepoint(T, Tprev),
+  holdsAt(F=V, Tprev),
   \+ broken(F=V, Tprev).
 
 holdsAt(F=V,T):-
   \+ isSDFluent(F),
+  T>1443650400,
+  %debugprint('Initiation: ', F=V, ' ', T), nl,
+  %write('Initiation: '), write(F=V), write(' '), write(T), nl,
   prevTimepoint(T, Tprev),
-  %subquery(initiatedAt(F=V, Tprev), P), writeln('Init Prob'), writeln(P),
   initiatedAt(F=V,Tprev).
 
 broken(F=V1, T):-

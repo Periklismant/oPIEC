@@ -9,7 +9,11 @@ oPIEC.egg-info/*
 __pycache__/*
 scripts/run_maritime.sh
 scripts/run_caviar.sh
-applications/maritime/datasets/*
-applications/caviar/datasets/*
+applications/maritime/datasets/Brest_with_noise_original/*
+applications/maritime/datasets/Brest_with_noise_preprocessed/*
+applications/caviar/datasets/*.pl
 src/Prob-EC/applicationsOld/*
 private/*
+scripts/*.result
+applications/maritime/loader-no-caching.pl
+applications/maritime/event_description/rules-no-caching.pl

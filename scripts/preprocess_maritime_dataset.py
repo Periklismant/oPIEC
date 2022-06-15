@@ -41,10 +41,10 @@ def filterVessels(file, vessels):
 	f=open(parent_path + file + '.pl', "r")
 	fw=open(parent_path + file + "_filtered.pl", "w")
 	for line in f:
-		if len(line)==1 or "processTimepoint" in line or checkVesselsInLine(vessels, line):
+		if len(line)==1 or "processTimepoint" in line or "lastTimepoint" in line or checkVesselsInLine(vessels, line):
 			fw.write(line)
 		elif line[-2]==".":
-			fw.write("true.\n")
+			fw.write("\ttrue.\n")
 	f.close()
 	fw.close()
 	fAgain=open(parent_path + file + "_filtered.pl", "r")
@@ -59,11 +59,27 @@ def filterVessels(file, vessels):
 			fwAgain.write(line)
 		elif "processTimepoint" not in line and line!="\n":
 			fwAgain.write(line)
+		elif "lastTimepoint" in line:
+			fwAgain.write(line)
 		prevline=line
 	fAgain.close()
 	fwAgain.close()
-	return 
+	return
 
+def getMostCommon(file, vesselsNo):
+	vessels = dict()
+	parent_path = '../applications/maritime/datasets/Brest_with_noise_preprocessed/'
+	f=open(parent_path + file + '.pl', "r")
+	for line in f:
+		if "vessel" in line:
+			vesselID = line.split('(')[3].split(')')[0]
+			if vesselID not in vessels:
+				vessels[vesselID]=1
+			else:
+				vessels[vesselID]+=1
+	f.close()
+	print(vessels)
+	return list(k for k, v in sorted(vessels.items(), key=lambda item: item[1], reverse=True))[:vesselsNo]
 
 # output: [eventName, timepoint, ArgumentsList, happensAtString].
 def processLine(line):
@@ -112,8 +128,11 @@ def get_prolog_facts(inputFile, outputFile, timepointsThreshold=-1, inputVessels
 	proximityCache = dict() # contains all vessel pairs recorded as 'proximate' at the current timepoint
 	previousTimepoint = -1 # stores the timepoint of the previous iteration.
 	timepointsCount = 0
+	lastTimePoint = 1443658584 # change this to "-1" to process the entire dataset
+	eventCount = 0
 	for line in f:
-		print(line)
+		if previousTimepoint > lastTimePoint:
+			break
 		eventArray = processLine(line)
 		if len(eventArray)>0:
 			eventName, timepoint = eventArray[0], int(eventArray[1])
@@ -154,10 +173,18 @@ def get_prolog_facts(inputFile, outputFile, timepointsThreshold=-1, inputVessels
 			if timepointsThreshold!=-1 and timepointsCount>timepointsThreshold:
 				fw.write('lastTimepoint(' + str(timepoint) + ').\n')
 				break
+		eventCount += 1
 	f.close()
 	fw.close()
+	print('Number of Events: ' + str(eventCount))
 
 # sys.argv = [$inputFileName, $outputFileName, $outputDatasetSizeInSeconds]
-vessels = ["227574020", "227705102"]
+#vessels = ["227574020", "227705102"]
 #get_prolog_facts(sys.argv[1], sys.argv[2], int(sys.argv[3])*86400)
-filterVessels(sys.argv[2], vessels)
+#filterVessels(sys.argv[2], vessels)
+
+#get_prolog_facts("Brest_10000", "Brest_2000", float(sys.argv[1])/24*86400)
+
+vessels = getMostCommon(sys.argv[1], int(sys.argv[2]))
+print(vessels)
+filterVessels(sys.argv[1], vessels)

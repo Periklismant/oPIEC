@@ -7,8 +7,24 @@ dynamicEntity(holdsAtIE, 2). % Retract all holdsAtIE facts after each window.
 initEntity(happensAt, 2).
 initEntity(holdsAtIE, 2).
 initEntity(cached, 1).
+%initEntity(cached, 1).
+%initEntity(cacheTemp, 1).
+%initEntity(groundFluent, 1).
 %initEntity(sdFluent, 1).
 %initEntity(sdMacro, 1).
+
+unknownDynamic:-
+	(
+		unknownEntity(Type, ArgNo), 
+		zeroList(ArgNo, ArgList),
+		Instance =..[Type|ArgList],
+		assertz(Instance),
+		debugprint(Instance),
+		retract(Instance),
+		fail
+	;
+		true
+	).
 
 initDynamic:-
 	(
@@ -133,3 +149,21 @@ emptyCache:-
 isSDFluent(GroundFluent):-
 	GroundFluent =.. [Fluent|_], 
 	sdFluent(Fluent).
+
+zeroList(0, []).
+zeroList(N, [0|Rest]):-
+	N>0,
+	NMinusOne is N - 1,
+	zeroList(NMinusOne, Rest).
+
+updateCache(T):-
+	retractall(cached(holdsAt(_, T))).
+
+/*
+updateCache:-
+	(subquery(cacheTemp(X), P), P>0, X=holdsAt(GroundFluent=_Value), \+isSDFluent(GroundFluent),
+	 retractall(cached(X)),
+	 retractall(cacheTemp(X)),
+	 assertz((P::cached(X))), fail ;
+	 true).
+*/
