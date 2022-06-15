@@ -18,7 +18,7 @@ Prob-EC and oPIEC may work as two separate systems. However, we use a pipeline o
 
 ## Available Applications
 
-- Human Activity Recognition ([CAVIAR dataset](http://groups.inf.ed.ac.uk/vision/CAVIAR/CAVIARDATA1/)).
+- Human Activity Recognition ([CAVIAR dataset](https://groups.inf.ed.ac.uk/vision/DATASETS/CAVIAR/CAVIARDATA1/)).
 - Maritime Monitoring ([Brest dataset](https://zenodo.org/record/1167595)).
 
 For download instructions, a brief description of the datasets and usage instructions, you may refer to the '.txt' files in the /datasets folder.
@@ -79,7 +79,7 @@ This program comes with ABSOLUTELY NO WARRANTY. This is free software, and you a
 
 # Documentation
 
-- Mantenoglou P., Artikis A., Paliouras G. [Online Probabilistic Interval-based Event Calculus](https://doi.org/10.3233/FAIA200399). 24th European Conference on Artificial Intelligence (ECAI), Santiago de Compostela, Spain, pp.2624-2631, 2020.
+- Mantenoglou P., Artikis A., Paliouras G. [Online Probabilistic Interval-based Event Calculus](https://doi.org/10.3233/FAIA200399). 24th European Conference on Artificial Intelligence (ECAI), pp.2624-2631, 2020.
 - Skarlatidis A., Artikis A., Filipou J., Paliouras G. [A probabilistic logic programming event calculus](https://doi.org/10.1017/S1471068413000690). Theory and Practice of Logic Programming (TPLP), 15(2):213-245, 2015.
 
 # Related Software
