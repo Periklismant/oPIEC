@@ -8,6 +8,7 @@ initEntity(id, 1).
 %sdFluent(close(_ID1,_ID2,_Threshold)).
 %sdFluent(orientation(_ID)).
 %sdFluent(appearance(_ID)).
+sdFluent(some).
 
 % ===== SIMPLE FLUENTS
 %simpleFluent(meeting(_ID1,_ID2)).
@@ -36,3 +37,9 @@ fluent(moving, [id, id], [true]).
 
 %---------------- leaving_object -----------------%
 fluent(leaving_object, [id, id], [true]).
+
+groundFluent(person, person(Id)):- id(Id).
+groundFluent(fighting, fighting(Id1, Id2)):- id(Id1), id(Id2), \+Id1=Id2.
+groundFluent(meeting, meeting(Id1, Id2)):- id(Id1), id(Id2), \+Id1=Id2.
+groundFluent(moving, moving(Id1, Id2)):- id(Id1), id(Id2), \+Id1=Id2.
+groundFluent(leaving_object, leaving_object(Id1, Id2)):- id(Id1), id(Id2), \+Id1=Id2.

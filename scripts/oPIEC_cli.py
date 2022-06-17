@@ -39,14 +39,14 @@ def select_strategy(strategy, durations):
 	return resolver
 
 def getInputFiles(useCase, inputFolder):
-	if useCase=='caviar':
+	'''if useCase=='caviar':
 		inputFiles = [None, None]
 		for f in os.scandir(inputFolder):
 			if "AppearanceIndv" in f.path:
 				inputFiles[0]=f.path
 			elif "MovementIndv" in f.path:
-				inputFiles[1]=f.path
-	elif useCase=='maritime':
+				inputFiles[1]=f.path'''
+	if useCase=='maritime' or useCase=='caviar':
 		inputFiles = [f.path for f in os.scandir(inputFolder)]
 	else:
 		print('Use case: "' + useCase + '" is not supported.')
@@ -75,12 +75,14 @@ def getEvents(useCase, eventsInp):
 	return events
 
 def getAuxiliary(useCase, repoPath, inputFiles, events):
+	print(inputFiles)
+	params = " -a " + repoPath + "/applications/" + useCase + "/loader.pl" + " -a " + inputFiles[0]
 	if useCase=='caviar':
-		probecPath = repoPath + '/src/Prob-EC/caviar/er_prob_orig_cached.pl'
-		params = " -a " + inputFiles[0] + " -a " + inputFiles[1]
+		probecPath = repoPath + '/src/Prob-EC/probec.pl'
+		#params += " -a " + inputFiles[0] + " -a " + inputFiles[1]
 	elif useCase=='maritime':
-		probecPath = repoPath + '/src/Prob-EC/maritime/er_prob_maritime_cached.pl'
-		params = " -a " + inputFiles[0]
+		probecPath = repoPath + '/src/Prob-EC/probec.pl'
+		#params += " -a " + inputFiles[0] 
 	else:
 		print('Use case: "' + useCase + '" is not supported.')
 		exit(1)
@@ -151,16 +153,18 @@ def run_probec(config):
 	"""Run Prob-EC; The input should be in the /datasets folder."""
 	useCase=config.usecase
 	repoPath=config.rootpath
+	print(repoPath)
 	events=getEvents(useCase,config.events)
 	outFileName=config.dataset.split('/')[-1]
 	inputFolder= repoPath + '/' + config.dataset
 
 	inputFiles = getInputFiles(useCase, inputFolder)
 	probecPath, events, params = getAuxiliary(useCase, repoPath, inputFiles, events)
-	fluentList, valueList, params = transformFluentsVals(events, params)
+	#fluentList, valueList, params = transformFluentsVals(events, params)
 	rawPath = repoPath + '/Prob-EC_output/raw/' + outFileName + '.result'
-
+	print("command: problog " + probecPath + params + ' > ' + rawPath)
 	os.system("problog " + probecPath + params + ' > ' + rawPath)
+	print(rawPath)
 
 @cli.command()
 @click.option('--inputPrefix', default='caviar_test', help='The input files for oPIEC are in /Prob-EC_output/preprocessed. \

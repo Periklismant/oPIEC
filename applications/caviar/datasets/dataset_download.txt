@@ -1,0 +1,2 @@
+You may download probabilistic versions of the CAVIAR dataset from https://owncloud.skel.iit.demokritos.gr/index.php/s/An9iCqhoZJiZuZj.
+Please follow the instructions in "applications/caviar/readme.md".

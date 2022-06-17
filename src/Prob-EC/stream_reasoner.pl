@@ -26,30 +26,23 @@ eventRec(Timepoint, _Fluents):-
 eventRec(Timepoint, Fluents):-
   lastTimepoint(LastTimepoint),
   LastTimepoint>Timepoint,
-  %writenl('Timepoint: ', Timepoint),
-  debugprint('Timepoint: ', Timepoint),
-  %debugprint('Fluents: ', Fluents),
-  %( %%% Executes all rules defining processTimepoint.
-  %  processTimepoint(Timepoint),  
-  %  fail 
-  %; true
-  %),
-  %processTimepoint(Timepoint),
-  (processTimepoint(Timepoint), fail ; true ),
-  %writenl(TList),
-  %debugprint(TList),
-  %findall(X, happensAt(X, T), Events),
-  %debugprint(Events),
-  %findall(holdsAtIE(X, T), (holdsAtIE(X, T), writenl(holdsAtIE(X, T))), HoldsAtIE),
-  %writenl(HoldsAtIE),
-  %debugprint(HoldsAtIE),
+  debugprint("Timepoint: ", Timepoint),
+  \+processTimepoint(Timepoint),
+  nextTimepoint(Timepoint, NextTimepoint),
+  eventRec(NextTimepoint, Fluents).  
+
+
+eventRec(Timepoint, Fluents):-
+  lastTimepoint(LastTimepoint),
+  LastTimepoint>Timepoint,
+  (processTimepoint(Timepoint), fail ; true),
   fetchGroundFVPs(Fluents, GroundFVPs),
-  %writenl(GroundFVPs),
   recFVPs(GroundFVPs, Timepoint),
-  updateFVPs(GroundFVPs, Timepoint),
+  %updateFVPs(GroundFVPs, Timepoint),
   forgetDynamic,
   nextTimepoint(Timepoint, NextTimepoint),
   eventRec(NextTimepoint, Fluents).  
+
 
 %
 % At current Timepoint, perform ER for all Fluents 
@@ -66,6 +59,7 @@ fetchGroundFVPs([Fluent|RestFluents], GroundFVPs):-
   %findall(GroundFluent, (groundFluent(GroundFluent), debugprint(GroundFluent), GroundFluent =.. [Fluent|_Arguments], debugprint(Fluent)), GroundFluents),
   findall(GroundFluent, (groundFluent(Fluent, GroundFluent)), GroundFluents), 
   GroundFluents\=[],
+  %groundFluent(Fluent, GroundFluent),
   fluent(Fluent, _ArgSorts, Values),
   fetchAllValues(GroundFluents, Values, AllCombos),
   fetchGroundFVPs(RestFluents, RestGroundFVPs),
@@ -90,23 +84,37 @@ recFVPs([GroundFVP|RestGroundFVPs], T):-
   %debugprint(GroundFVP),
   nextTimepoint(T, Tnext),
   subquery(holdsAt(GroundFVP, Tnext), P),
-  (P>0.0, writenl(P, '::holdsAt(', GroundFVP, ',', Tnext, ').');
-    P=0.0),
+  subquery(cached(holdsAt(GroundFVP)), Pcached),
+  Pdiff is abs(P-Pcached),
+  ((Pdiff>0.01, 
+  writenl(P, '::holdsAt(', GroundFVP, ',', Tnext, ').'),
+  %debugprint(P, '::holdsAt(', GroundFVP, '=', Value, ',', Tnext, ').'),
+  retractall(cached(holdsAt(GroundFVP))), 
+  assertz((P::cached(holdsAt(GroundFVP)))));
+  Pdiff =< 0.01),
   recFVPs(RestGroundFVPs, T).
+
+  %updateFVPs(RestGroundFVPs, T).
+
+  %(P>0.0, writenl(P, '::holdsAt(', GroundFVP, ',', Tnext, ').')
+  % ;
+  %  P=0.0),
+  %recFVPs(RestGroundFVPs, T).
 
 updateFVPs([], _T).
 
 updateFVPs([GroundFVP|RestGroundFVPs], T):- 
+  %debugprint(GroundFVP),
   nextTimepoint(T, Tnext),
   subquery(holdsAt(GroundFVP , Tnext), P),
   subquery(cached(holdsAt(GroundFVP)), Pcached),
   Pdiff is abs(P-Pcached),
-  ((Pdiff>0, 
+  ((Pdiff>0.01, 
   %writenl(P, '::holdsAt(', GroundFluent, '=', Value, ',', Tnext, ').'),
   %debugprint(P, '::holdsAt(', GroundFluent, '=', Value, ',', Tnext, ').'),
   retractall(cached(holdsAt(GroundFVP))), 
   assertz((P::cached(holdsAt(GroundFVP)))));
-  Pdiff =< 0),
+  Pdiff =< 0.01),
   updateFVPs(RestGroundFVPs, T).
 
 
