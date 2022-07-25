@@ -1,5 +1,6 @@
 datasetsOLD/*
 Prob-EC_output/raw/*.result
+Prob-EC_output/raw/*.txt
 Prob-EC_output/preprocessed/*.pl
 oPIEC_output/*.result
 src/oPIEC-python/__pycache__/*

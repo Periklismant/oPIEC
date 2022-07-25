@@ -6,7 +6,7 @@
 	cmd_args(Args), % Args = [InputFileName, Fluent1, Fluent2, ..., FluentM].
 	Args = [Loader,Stream], % Prob-EC will detect the specified fluents AND all their constituents
 	debugprint("Loading Prob-EC..."),
-	['event_calculus'], %% ['original_ec'], %% ['event_calculus'],
+	['event_calculus'], 
 	['utilities'],
 	[Loader],
 	load_event_description,

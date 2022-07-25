@@ -26,7 +26,6 @@ eventRec(Timepoint, _Fluents):-
 eventRec(Timepoint, Fluents):-
   lastTimepoint(LastTimepoint),
   LastTimepoint>Timepoint,
-  debugprint("Timepoint: ", Timepoint),
   \+processTimepoint(Timepoint),
   nextTimepoint(Timepoint, NextTimepoint),
   eventRec(NextTimepoint, Fluents).  
