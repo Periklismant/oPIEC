@@ -2,27 +2,37 @@
 % Init Complex Event Recognition
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 performFullER:-
+  % get first time-point of the stream based on domain knowledge
   firstTimepoint(FirstTimepoint),
+  % assert and retract all dynamic predicates to avoid unknown predicate errors
+  % TODO: Is there a simple way to avoid this??
   initDynamic,
-  %unknownDynamic,
+  % find all fluents of the application and create a topologically sorted list
+  % of the fluents based on the dependencies amoong fluents imposed by 
+  % domain specific initiatedAt rules.
   findall(FluentName, fluent(FluentName, _, _), FluentNames), 
   findDependencies(FluentNames, FluentsOrdered), 
-  %debugprint(FluentsOrdered),
-  % Grounding before retrieving initial values is impossible since dynamic entities have not been asserted.
-  % getInitially(FluentsOrdered, FirstTimepoint), % Assert the initial values of fluents.
+  % perform event recognition starting from the FirstTimepoint. 
+  % at each time-point, Prob-EC computes holdsAt for all fluent-value pairs (FVP)s
+  % according to the order imposed by FluentsOrdered.
   eventRec(FirstTimepoint, FluentsOrdered).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % ER utils
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-%
-% Perform ER for all fluents per timepoint
-%
+%%%%% Compute all FVPs at each timepoint %%%%%
+
+%eventRec(+Timepoint, +Fluents)
+
+% if we have passed the end of the stream
+% then terminate with true.
 eventRec(Timepoint, _Fluents):-
   lastTimepoint(LastTimepoint),
   Timepoint>LastTimepoint.
 
+% otherwise, if there is no input event for the current Timepoint,
+% move to the NextTimepoint
 eventRec(Timepoint, Fluents):-
   lastTimepoint(LastTimepoint),
   LastTimepoint>Timepoint,
@@ -30,115 +40,83 @@ eventRec(Timepoint, Fluents):-
   nextTimepoint(Timepoint, NextTimepoint),
   eventRec(NextTimepoint, Fluents).  
 
-
+% otherwise, assert all probabilistic facts occurring at this Timepoint, 
+% compute the truth values of all FVPs at this Timepoint, 
+% forget (retract) all dynamic (input) predicates asserted at the first step,
+% and move event recognition at the NextTimepoint.
 eventRec(Timepoint, Fluents):-
   lastTimepoint(LastTimepoint),
   LastTimepoint>Timepoint,
+  % This "loop" computes all rules matching processTimepoint(Timepoint).
+  % It is an abbreviation of "findall" without the output list. 
   (processTimepoint(Timepoint), fail ; true),
+  % Produce all possible groundings of the fluents of the event description,
+  % while maintaining the dependency based topological sorting. 
+  % Grounding is guided by domain specifications and the entities take part 
+  % in the events which occur at the current time-point.
   fetchGroundFVPs(Fluents, GroundFVPs),
+  % Compute holdsAt for each grounding of FVPs at the current Timepoint. 
   recFVPs(GroundFVPs, Timepoint),
-  %updateFVPs(GroundFVPs, Timepoint),
+  % Now that all FVPs have been computed, we can safely retract the 
+  % input events (dynamic entities) which take place at this Timepoint
   forgetDynamic,
+  % Event recognition moves to the NextTimepoint.
   nextTimepoint(Timepoint, NextTimepoint),
   eventRec(NextTimepoint, Fluents).  
 
-
-%
-% At current Timepoint, perform ER for all Fluents 
-%
-fetchGroundFVPs([], []).
-
-fetchGroundFVPs([Fluent|RestFluents], GroundFVPs):- 
-  \+ groundFluent(Fluent, GroundFluent), 
-  %findall(GroundFluent, (groundFluent(GroundFluent), debugprint(GroundFluent), GroundFluent =.. [Fluent|Arguments], debugprint(Fluent)), []),
-  fetchGroundFVPs(RestFluents, GroundFVPs).
-
-fetchGroundFVPs([Fluent|RestFluents], GroundFVPs):-
-  %findall(GroundFluent, (subquery(generateGroundFluent(Fluent, GroundFluent), P), P>0), GroundFluents),
-  %findall(GroundFluent, (groundFluent(GroundFluent), debugprint(GroundFluent), GroundFluent =.. [Fluent|_Arguments], debugprint(Fluent)), GroundFluents),
-  findall(GroundFluent, (groundFluent(Fluent, GroundFluent)), GroundFluents), 
-  GroundFluents\=[],
-  %groundFluent(Fluent, GroundFluent),
-  fluent(Fluent, _ArgSorts, Values),
-  fetchAllValues(GroundFluents, Values, AllCombos),
-  fetchGroundFVPs(RestFluents, RestGroundFVPs),
-  append(AllCombos, RestGroundFVPs, GroundFVPs).
-
-fetchAllValues([], _, []).
-
-fetchAllValues([GroundFluent|RestGroundFluents], Values, AllCombos):-
-  fetchAllValues0(GroundFluent, Values, GroundFVPs),
-  fetchAllValues(RestGroundFluents, Values, RestAllCombos),
-  append(GroundFVPs, RestAllCombos, AllCombos).
-
-fetchAllValues0(_GroundFluent, [], []).
-
-fetchAllValues0(GroundFluent, [Value|RestValues], [GroundFluent=Value|RestFVPs]):-
-  fetchAllValues0(GroundFluent, RestValues, RestFVPs).
+%%%%% Compute all FVPs at the given timepoint %%%%%
   
+% recFVPs(+GroundFVPs, +T)
 
+% All each GroundFVP: 
+% (i)  Compute the probability that GroundFVP holds at the next time-point.
+%      This probability is affected by the firing of an initiation or `broken'
+%      rule at the current time-point and not by any event at the next time-point.
+%      So, all information relevant to this computation is now available.
+% (ii) Compute the previous probability of holdsAt for GroundFVP.
+% (iii) If there is a significant difference between these probabilities, 
+%       update the cache with the probability computed for GroundFVP at the next
+%       time-point.
+
+% TODO: Fix bug: the cached probability does not correspond to the probability
+%       of GroundFVP at the current time-point T, but at Tnext. 
+%       Therefore, there may be incorrect computations for FVPs of higher
+%       hierarchical levels, i.e., for FVPs which appear later in the 
+%       topologically sorted list of fluents.
 recFVPs([], _T).
 
 recFVPs([GroundFVP|RestGroundFVPs], T):-
-  %debugprint(GroundFVP),
   nextTimepoint(T, Tnext),
+  % run a subquery for GroundFVP at the next time-point.
+  % P is equal to the probability of holdsAt(GroundFVP, Tnext),
+  % while the probability of the subquery predicate is 1.
   subquery(holdsAt(GroundFVP, Tnext), P),
+  % retrieves the cached probability of GroundFVP and
+  % stores it in Pcached 
   subquery(cached(holdsAt(GroundFVP)), Pcached),
   Pdiff is abs(P-Pcached),
+  % If the difference is above 1%, then write the probabilistic 
+  % instantaneous recognition for GroundFVP at time-point Tnext
+  % in the output and update the probability of cached(holdsAt(GroundFVP)).
   ((Pdiff>0.01, 
   writenl(P, '::holdsAt(', GroundFVP, ',', Tnext, ').'),
   %debugprint(P, '::holdsAt(', GroundFVP, '=', Value, ',', Tnext, ').'),
   retractall(cached(holdsAt(GroundFVP))), 
   assertz((P::cached(holdsAt(GroundFVP)))));
   Pdiff =< 0.01),
+  % Move to the next GroundFVP.
   recFVPs(RestGroundFVPs, T).
 
-  %updateFVPs(RestGroundFVPs, T).
 
-  %(P>0.0, writenl(P, '::holdsAt(', GroundFVP, ',', Tnext, ').')
-  % ;
-  %  P=0.0),
-  %recFVPs(RestGroundFVPs, T).
-
-updateFVPs([], _T).
-
-updateFVPs([GroundFVP|RestGroundFVPs], T):- 
-  %debugprint(GroundFVP),
-  nextTimepoint(T, Tnext),
-  subquery(holdsAt(GroundFVP , Tnext), P),
-  subquery(cached(holdsAt(GroundFVP)), Pcached),
-  Pdiff is abs(P-Pcached),
-  ((Pdiff>0.01, 
-  %writenl(P, '::holdsAt(', GroundFluent, '=', Value, ',', Tnext, ').'),
-  %debugprint(P, '::holdsAt(', GroundFluent, '=', Value, ',', Tnext, ').'),
-  retractall(cached(holdsAt(GroundFVP))), 
-  assertz((P::cached(holdsAt(GroundFVP)))));
-  Pdiff =< 0.01),
-  updateFVPs(RestGroundFVPs, T).
-
-
-%%%% OLD %%%% 
+%%%% OLD, CURRENTLY UNUSED CODE %%%% 
 
 recAllFluents(_Timepoint, []).
 
-/*
-recAllFluents(Timepoint, _Fluents):-
-  \+ processTimepoint(Timepoint).
-
-recAllFluents(Timepoint, Fluents):-
-  processTimepoint(Timepoint), 
-  recAllFluents0(Timepoint, Fluents).
-*/
-
 recAllFluents(Timepoint, [Fluent|RestFluents]):-
-  %findall(GroundFluent, (subquery(generateGroundFluent(Fluent, GroundFluent), P), P>0), []),
   findall(GroundFluent, (fluent(Fluent, ArgList, _), length(ArgList, ArgNo), length(X, ArgNo), GroundFluent =.. [Fluent|X], groundFluent(GroundFluent)), []), 
-  %findall(GroundFluent, (groundFluent(GroundFluent), debugprint(GroundFluent), GroundFluent =.. [Fluent|Arguments], debugprint(Fluent)), []),
   recAllFluents(Timepoint, RestFluents).
 
 recAllFluents(Timepoint, [Fluent|RestFluents]):-
-  %findall(GroundFluent, (subquery(generateGroundFluent(Fluent, GroundFluent), P), P>0), GroundFluents),
-  %findall(GroundFluent, (groundFluent(GroundFluent), debugprint(GroundFluent), GroundFluent =.. [Fluent|_Arguments], debugprint(Fluent)), GroundFluents),
   findall(GroundFluent, (fluent(Fluent, ArgList, _), length(ArgList, ArgNo), length(X, ArgNo), GroundFluent =.. [Fluent|X], groundFluent(GroundFluent)), GroundFluents), 
   GroundFluents\=[],
   %debugprint(GroundFluents),
@@ -229,3 +207,27 @@ update(GroundFluent, T, Value):-
   retractall(cached(holdsAt(GroundFluent = Value))), 
   assertz((P::cached(holdsAt(GroundFluent = Value)))));
   Pdiff =< 0).
+
+
+  %updateFVPs(RestGroundFVPs, T).
+
+  %(P>0.0, writenl(P, '::holdsAt(', GroundFVP, ',', Tnext, ').')
+  % ;
+  %  P=0.0),
+  %recFVPs(RestGroundFVPs, T).
+
+updateFVPs([], _T).
+
+updateFVPs([GroundFVP|RestGroundFVPs], T):- 
+  %debugprint(GroundFVP),
+  nextTimepoint(T, Tnext),
+  subquery(holdsAt(GroundFVP , Tnext), P),
+  subquery(cached(holdsAt(GroundFVP)), Pcached),
+  Pdiff is abs(P-Pcached),
+  ((Pdiff>0.01, 
+  %writenl(P, '::holdsAt(', GroundFluent, '=', Value, ',', Tnext, ').'),
+  %debugprint(P, '::holdsAt(', GroundFluent, '=', Value, ',', Tnext, ').'),
+  retractall(cached(holdsAt(GroundFVP))), 
+  assertz((P::cached(holdsAt(GroundFVP)))));
+  Pdiff =< 0.01),
+  updateFVPs(RestGroundFVPs, T).

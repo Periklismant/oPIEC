@@ -1,31 +1,15 @@
+% Retract all facts of dynamic predicates after processing each time-point.
+dynamicEntity(happensAt, 2). 
+dynamicEntity(holdsAtIE, 2). 
 
-
-%
-dynamicEntity(happensAt, 2). % Retract all happensAt facts after each window.
-dynamicEntity(holdsAtIE, 2). % Retract all holdsAtIE facts after each window.
-
+% Assert and retract a fact of these predicates at the start of the execution.
 initEntity(happensAt, 2).
 initEntity(holdsAtIE, 2).
 initEntity(cached, 1).
-%initEntity(cached, 1).
-%initEntity(cacheTemp, 1).
-%initEntity(groundFluent, 1).
-%initEntity(sdFluent, 1).
-%initEntity(sdMacro, 1).
 
-unknownDynamic:-
-	(
-		unknownEntity(Type, ArgNo), 
-		zeroList(ArgNo, ArgList),
-		Instance =..[Type|ArgList],
-		assertz(Instance),
-		debugprint(Instance),
-		retract(Instance),
-		fail
-	;
-		true
-	).
-
+% Asserts and retracts dynamic predicates which do not appear 
+% in probabilistic facts or rules at the starting program
+% to avoid unknown predicate errors 
 initDynamic:-
 	(
 		initEntity(Type, ArgNo),
@@ -37,6 +21,9 @@ initDynamic:-
 	;
 		true
 	).
+
+% Retract all dynamic entities referring to a prior time-point
+% to keep the working memory minimal.
 forgetDynamic:-
 	findall(Instance, 
 			(dynamicEntity(Type, ArgNo),
@@ -44,32 +31,48 @@ forgetDynamic:-
 			Instance =..[Type|ArgList],
 			retractall(Instance)), List).
 
-member0(X, [X|T]).
+% fetchGroundFVPs(+Fluents, -GroundFVPs)
 
-member0(X, [H|T]):-
-	X\=H,
-	member0(X, T).
+% Given a list of Fluents, generate all possible groundings of their FVPs
+% Grounding is guided by domain specific declarations.
+% Domain entities are derived by the entities that take part in the events
+% taking place at the current time-point.
 
-uniqueArguments([]).
+fetchGroundFVPs([], []).
 
-uniqueArguments([H|T]):-
-	\+ member0(H, T), 
-	uniqueArguments(T).	
+% If there is no possible grounding of Fluent, so move to the next one.
+fetchGroundFVPs([Fluent|RestFluents], GroundFVPs):- 
+  \+ groundFluent(Fluent, GroundFluent), 
+  fetchGroundFVPs(RestFluents, GroundFVPs).
 
-% Generate valid grounding. 
-groundArguments([],[]).
-groundArguments([ArgSort|Sorts], [Arg|Args]):-
-	ArgFull =.. [ArgSort, Arg],
-	ArgFull,
-	groundArguments(Sorts, Args).
+% Find all possible groundings of Fluent. 
+% Next, find all possible combinations of grounded fluent + possible fluent value.
+% This works like a cross product. 
+% Finally, find all possible groundings of the remaining FVPs and append 
+% them in the output list, respecting the given order of fluents.
+fetchGroundFVPs([Fluent|RestFluents], GroundFVPs):-
+  findall(GroundFluent, (groundFluent(Fluent, GroundFluent)), GroundFluents), 
+  GroundFluents\=[],
+  fluent(Fluent, _ArgSorts, Values),
+  fetchAllValues(GroundFluents, Values, AllCombos),
+  fetchGroundFVPs(RestFluents, RestGroundFVPs),
+  append(AllCombos, RestGroundFVPs, GroundFVPs).
 
-% Ground the arguments of a fluent with a combination of possible arguments from the knowledge base. Respect the sort of each argument.
-generateGroundFluent(FluentName, GroundFluent):-
-	fluent(FluentName, ArgumentSorts, _Values),
-	groundArguments(ArgumentSorts, Arguments),
-	subquery(uniqueArguments(Arguments), P), P>0,
-	GroundFluent =.. [FluentName|Arguments].
+% fetchAllValues(+GroundFluents, +Values, -AllCombos)
 
+% Computes the cross product of the first two lists.
+% Pairs have the form: GroundFluent=Value.
+fetchAllValues([], _, []).
+
+fetchAllValues([GroundFluent|RestGroundFluents], Values, AllCombos):-
+  fetchAllValues0(GroundFluent, Values, GroundFVPs),
+  fetchAllValues(RestGroundFluents, Values, RestAllCombos),
+  append(GroundFVPs, RestAllCombos, AllCombos).
+
+fetchAllValues0(_GroundFluent, [], []).
+
+fetchAllValues0(GroundFluent, [Value|RestValues], [GroundFluent=Value|RestFVPs]):-
+  fetchAllValues0(GroundFluent, RestValues, RestFVPs).
 
 %Cache the initial values of all fluents in the application.
 %getInitially(+FluentList, +FirstTimepointOfApplication).
@@ -140,20 +143,5 @@ isSDFluent(GroundFluent):-
 	GroundFluent =.. [Fluent|_], 
 	sdFluent(Fluent).
 
-zeroList(0, []).
-zeroList(N, [0|Rest]):-
-	N>0,
-	NMinusOne is N - 1,
-	zeroList(NMinusOne, Rest).
-
 updateCache(T):-
 	retractall(cached(holdsAt(_, T))).
-
-/*
-updateCache:-
-	(subquery(cacheTemp(X), P), P>0, X=holdsAt(GroundFluent=_Value), \+isSDFluent(GroundFluent),
-	 retractall(cached(X)),
-	 retractall(cacheTemp(X)),
-	 assertz((P::cached(X))), fail ;
-	 true).
-*/
