@@ -113,7 +113,9 @@ recFVPs([GroundFVP|RestGroundFVPs], T):-
 recAllFluents(_Timepoint, []).
 
 recAllFluents(Timepoint, [Fluent|RestFluents]):-
+  %findall(GroundFluent, (subquery(generateGroundFluent(Fluent, GroundFluent), P), P>0), []),
   findall(GroundFluent, (fluent(Fluent, ArgList, _), length(ArgList, ArgNo), length(X, ArgNo), GroundFluent =.. [Fluent|X], groundFluent(GroundFluent)), []), 
+  %findall(GroundFluent, (groundFluent(GroundFluent), debugprint(GroundFluent), GroundFluent =.. [Fluent|Arguments], debugprint(Fluent)), []),
   recAllFluents(Timepoint, RestFluents).
 
 recAllFluents(Timepoint, [Fluent|RestFluents]):-
