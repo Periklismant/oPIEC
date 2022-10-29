@@ -4,15 +4,29 @@ from utils import stripIntervalTree,get_input_and_fill,tree_add_merge
 from ssResolver import *
 from intervaltree import Interval, IntervalTree
 
+def computeCredibility(interval, probability):
+	'''
+Given an interval and a probability value, compute its credibility.
+
+inteval_credibility = interval_length * interval_probability.
+	'''
+	return (interval[1]-interval[0])*probability 
+	
 def getCredible(intervalsAndProbs):
-	'''Input list is in the form: [((Tstart1, Tend1), Prob1),((Tstart2, Tend2), Prob2), ...].
-	   The first element of each tuple is an interval (starting point, ending point) and the second is its probability.
-	   The credility of an interval is measured as: length*probability.
-	   getCredible find the most credible interval within a region of overlapping intervals.
-	   The return value is a list of non-overlapping intervals constructed from the input list.
-	   '''
+	'''
+Given a list of intervals, with their probability values attached, find, for each region of overlapping intervals, the most credible one. 
+		
+inteval_credibility = interval_length * interval_probability.
+input list: [((Tstart1, Tend1), Prob1), ((Tstart2, Tend2), Prob2), ...].
+first tuple element: (starting point, ending point) of interval.
+second tuple element: interval probability.
+return value: a list of non-overlapping intervals.
+
+** The input list must be temporally sorted by interval starting point **
+	'''
 	if not intervalsAndProbs:
 		return []
+
 	intervals = list(map(lambda x:x[0], intervalsAndProbs))
 	probabilities = list(map(lambda x: x[1], intervalsAndProbs))
 
@@ -21,38 +35,43 @@ def getCredible(intervalsAndProbs):
 
 	nonOverlap = list()
 	tmp = 0
-	currentValue = intervals[0][1]
+	currentValue = intervals[0][1] # ending point of current interval
 	currentInterval = intervals[0]
-	max_cred = (intervals[0][1] - intervals[0][0])*probabilities[0]
+	max_cred = computeCredibility(interval[0], probabilities[0])
 	flag1 = True
 	
 	for i in range(1, len(intervals)):
+		''' if the starting point of the current interval is earlier than the ending point of the previous interval, 
+		then replace the cached interval with the current interval if the latter's credibility is greater than the max credibility in the current overlapping region
+		otherwise, initialise the next overlapping region.  
+		'''
+		cred = computeCredibility(interval[i], probabilities[i]) 
 		if (intervals[i][0] < currentValue):
-			if ((intervals[i][1] - intervals[i][0])*probabilities[i] >= max_cred):
-				max_cred = (intervals[i][1] - intervals[i][0])*probabilities[i]
-				currentInterval = intervals[i]			
+			if (cred >= max_cred):
+				max_cred = cred 
 			currentValue = intervals[i][1]
 		else:
 			nonOverlap.append(currentInterval)
-			#print(currentInterval,max_cred)
-			currentInterval = intervals[i]
 			currentValue = intervals[i][1]
-			max_cred = (intervals[i][1] - intervals[i][0])*probabilities[i]
+			max_cred = cred
+		currentInterval = intervals[i]
+	
 	nonOverlap.append(currentInterval)
+
 	return nonOverlap
 
 def run_batches(inputArray, threshold, batchsize=1, WM_size=sys.maxsize, ssResolver=None, verbose=False):
 	'''
-	Seperates the input array in data batches and executes oPIEC for each batch, sequentially.
-	The support set, the set of computed intervals and the remaining auxilary data are being updated between executions of oPIEC.
-	inputArray <- List of probability values.
-	threshold <- Lower bound of accepted interval probability.
-	batchsize <- The length of each data batch.
-	WM_size <- The maximum number of elements in the support set.
-	ssResolver <- A tuple (funcName, helpData) where funcName is the name of the function employed for support set maintenance
-	              and helpData is a data structure with auxiliary information needed for ${funcName} (sometimes helpData is None).
-	verbose <- blah blah. 
+Seperates the input array in data batches and executes oPIEC for each batch, sequentially.
+	
+inputArray: a list of probability values.
+threshold: lower bound of accepted interval probability.
+batchsize: the length of each data batch.
+WM_size: maximum number of elements in the support set.
+ssResolver: a tuple (function_name, function_params), where function_name is the function used to resolve support set size conflicts and function_params is list of parameters used by that function.  
+verbose: print messages for debugging. 
 	'''
+
 	def generate_batches(inputArray, batchsize):
 		'''Create as many data batches with length of ${batchsize} as possible.'''
 		for i in range(0, len(inputArray), batchsize):
@@ -73,26 +92,27 @@ def run_batches(inputArray, threshold, batchsize=1, WM_size=sys.maxsize, ssResol
 			print("Intervals of batch: " + str(batch_intervals))
 		for inter in batch_intervals:
 			start=inter[0][0]
-			end=inter[0][1]+1 #Because they are right open
+			end=inter[0][1]+1 # intervals are right open
 			prob=inter[1]
 			resultTree.remove_envelop(start,end)
 			tree_add_merge(resultTree, start, end, prob)
-			#resultTree[start:end]=prob
 
 	return stripIntervalTree(sorted(resultTree))
 
 def oPIEC(inputArray, threshold, start_timestamp=0, ignore_value=sys.maxsize, support_set=None, prev_prefix=0, 
 	WM_size=sys.maxsize, ssResolver=None, verbose=False):
-	'''oPIEC routine for each data batch. If WM_size==0 and support_set is empty, this is batch PIEC.
-	inputArray <- list of probability values (could be a data batch or the entire dataset).
-	threshold <- lower bound of accepted interval probability (e.g. 0.5).
-	start_timestamp <- global timestamp of first element of current data batch. Necessary to compute temporally sound PMIs.
-	ignore_value <- lowest prefix value computed so far (until the previous batch).
-	support_set <- list of tuples (t, prefix[t-1]) where t is a potential starting point.
-	prev_prefix <- last prefix value of previous data batch.
-	WM_size <- maximum allowed support set size -- working memory limit.
-	ssResolver <- ssResolver[0] is the function used resolver support set size conflicts -- ssResolver[1] is list of parameters used by ssResolver[0].  
-	verbose <- blah blah blah if True
+	'''
+Run oPIEC for the given data batch. 
+
+inputArray: list of probability values.
+threshold: lower bound of accepted interval probability (e.g. 0.5).
+start_timestamp: global timestamp of first element of current data batch.
+ignore_value: lowest prefix value computed up to this data batch.
+support_set: list of tuples (t, prefix[t-1]) where t is a potential starting point and prefix[t-1] its "score".
+prev_prefix: last prefix value of previous data batch.
+WM_size: upper bound for support set size, i.e., working memory limit.
+ssResolver: a tuple (function_name, function_params), where function_name is the function used to resolve support set size conflicts and function_params is list of parameters used by that function.  
+verbose: print messages for debugging. 
 	'''
 	result=list()
 	inputSize = len(inputArray)
@@ -211,9 +231,18 @@ def oPIEC(inputArray, threshold, start_timestamp=0, ignore_value=sys.maxsize, su
 
 	return result, support_set, prev_prefix, ignore_value, end_timestamp 
 
-def runoPIEC(repoPath, fileName, threshold=0.9, batchsize=1000, WM_size=2, ssResolver=(smallestRanges, None)):
-	'''Reads the recognition of Prob-EC from the file specified by the user.
-	   Executes oPIEC for the given parameters and write the output to a file.'''
+def runoPIEC(repoPath, fileName, threshold=0.9, batchsize=1000, WM_size=2, ssResolver=(smallestRanges, None), verbose=False):
+	'''
+Reads the recognition of Prob-EC, runs oPIEC for the given threshold, data batch size, and working memory size and writes the output to a file. 
+
+repoPath: location of this repo.
+fileName: file containing the recognition of Prob-EC. 
+threshold: lower bound of accepted interval probability.
+batchsize: the length of each data batch.
+WM_size: maximum number of elements in the support set.
+ssResolver: a tuple (function_name, function_params), where function_name is the function used to resolve support set size conflicts and function_params is list of parameters used by that function.  
+verbose: print messages for debugging. 
+	''' 
 	print("Starting `oPIEC' for " + fileName + "...")
 	baseFolder = repoPath + '/Prob-EC_output/preprocessed/'
 	writeFolder = repoPath + '/oPIEC_output/'
@@ -226,7 +255,7 @@ def runoPIEC(repoPath, fileName, threshold=0.9, batchsize=1000, WM_size=2, ssRes
 		for key in allInputs:
 			inputArray=allInputs[key]
 			if len(inputArray)>1: #if there is recognition for that specific fluent-value pair (e.g., meeting(id1,id2)=true).
-				oPIECresult = run_batches(inputArray, threshold, WM_size=WM_size, batchsize=batchsize, ssResolver=ssResolver, verbose=False)
+				oPIECresult = run_batches(inputArray, threshold, WM_size=WM_size, batchsize=batchsize, ssResolver=ssResolver, verbose=verbose)
 				CrediblePMIs = getCredible(oPIECresult)
 				fw=open(writePath, 'a')
 				fw.write(key + ' : ' + str(CrediblePMIs) + '\n')
