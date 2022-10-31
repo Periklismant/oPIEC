@@ -14,3 +14,7 @@ fluent(location, [person], [pub]).
 %---------------- happy -----------------%
 fluent(happy, [person], [true]).
 sdFluent(happy).
+
+groundFluent(rich, rich(Person)):- person(Person).
+groundFluent(location, location(Person)):- person(Person).
+groundFluent(happy, happy(Person)):- person(Person).

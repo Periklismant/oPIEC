@@ -43,3 +43,4 @@ groundFluent(fighting, fighting(Id1, Id2)):- id(Id1), id(Id2), \+Id1=Id2.
 groundFluent(meeting, meeting(Id1, Id2)):- id(Id1), id(Id2), \+Id1=Id2.
 groundFluent(moving, moving(Id1, Id2)):- id(Id1), id(Id2), \+Id1=Id2.
 groundFluent(leaving_object, leaving_object(Id1, Id2)):- id(Id1), id(Id2), \+Id1=Id2.
+

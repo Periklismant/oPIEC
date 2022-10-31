@@ -1,14 +1,14 @@
-0.4 ::holdsAt( rich(bob) = true , 2 ).
-0.6 ::holdsAt( location(alice) = pub , 3 ).
-0.32 ::holdsAt( rich(bob) = true , 4 ).
-1.0 ::holdsAt( location(bob) = pub , 5 ).
-0.6 ::holdsAt( rich(alice) = true , 5 ).
-0.32 ::holdsAt( happy(bob) = true , 5 ).
-0.36 ::holdsAt( happy(alice) = true , 5 ).
-0.8 ::holdsAt( location(bob) = pub , 6 ).
-0.256 ::holdsAt( happy(bob) = true , 6 ).
-0.192 ::holdsAt( rich(bob) = true , 7 ).
-0.48 ::holdsAt( rich(alice) = true , 7 ).
-0.1536 ::holdsAt( happy(bob) = true , 7 ).
-0.288 ::holdsAt( happy(alice) = true , 7 ).
+0.4 ::holdsAt( rich(bob)=true , 2 ).
+0.6 ::holdsAt( location(alice)=pub , 3 ).
+0.32 ::holdsAt( rich(bob)=true , 4 ).
+1.0 ::holdsAt( location(bob)=pub , 5 ).
+0.6 ::holdsAt( rich(alice)=true , 5 ).
+0.32 ::holdsAt( happy(bob)=true , 5 ).
+0.36 ::holdsAt( happy(alice)=true , 5 ).
+0.8 ::holdsAt( location(bob)=pub , 6 ).
+0.256 ::holdsAt( happy(bob)=true , 6 ).
+0.192 ::holdsAt( rich(bob)=true , 7 ).
+0.48 ::holdsAt( rich(alice)=true , 7 ).
+0.1536 ::holdsAt( happy(bob)=true , 7 ).
+0.288 ::holdsAt( happy(alice)=true , 7 ).
 

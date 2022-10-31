@@ -1,4 +1,4 @@
-from setuptools import setup
+from setuptools import setup, find_packages
 
 setup(
 	name='oPIEC',
@@ -7,8 +7,12 @@ setup(
 	install_requires=[
 		'Click', 'problog', 'intervaltree'
 	],
-	scripts=['scripts/oPIEC_cli.py','src/oPIEC-python/oPIEC.py', 'src/oPIEC-python/utils.py','src/oPIEC-python/ssResolver.py'],
-	package_data = {'oPIEC': ['datasets/*']},
+	packages=['oPIEC_scripts', 'Prob-EC'],
+	package_data = {
+		'oPIEC_scripts': ['*.py'],
+		'Prob-EC': ['*.pl']
+	},
+	scripts=['oPIEC_scripts/scripts/oPIEC_cli.py'],
 	entry_points={
 		'console_scripts':['oPIEC=oPIEC_cli:cli'],
                 },

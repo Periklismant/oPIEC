@@ -1,10 +1,27 @@
 import click
 import os
 import sys
+import pkg_resources
+#import imp
 
 #### Import functions ### 
+#from pkg_resources.resource_filename("oPIEC", "oPIEC.py") import runoPIEC as oPIECfunction
+#import pkg_resources.resource_filename("oPIEC", "ssResolver.py")
+sys.path.append(os.path.dirname(pkg_resources.resource_filename("oPIEC_scripts", "oPIEC.py")))
 from oPIEC import runoPIEC as oPIECfunction
 import ssResolver
+
+#print(pkg_resources.resource_filename("oPIEC_scripts", "oPIEC.py"))
+#utils = __import__(pkg_resources.resource_filename("oPIEC_scripts", "utils.py"))
+#ssResolver = __import__(pkg_resources.resource_filename("oPIEC_scripts", "ssResolver.py"))
+#oPIEC_path = pkg_resources.resource_filename("oPIEC_scripts", "oPIEC.py")
+
+#oPIEC = __import__("oPIEC_scripts", "oPIEC.py")
+
+#for pythonFileName in ['utils.py', 'ssResolver.py', 'oPIEC.py']:
+#	codePath = pkg_resources.resource_filename("oPIEC_scripts", pythonFileName) 
+#	print(codePath)
+#	oPIEC = imp.load_source("oPIEC", codePath)	
 
 ### Helper functions ###
 def splitReqPath(reqPath):
@@ -39,13 +56,6 @@ def select_strategy(strategy, durations):
 	return resolver
 
 def getInputFiles(useCase, inputFolder):
-	'''if useCase=='caviar':
-		inputFiles = [None, None]
-		for f in os.scandir(inputFolder):
-			if "AppearanceIndv" in f.path:
-				inputFiles[0]=f.path
-			elif "MovementIndv" in f.path:
-				inputFiles[1]=f.path'''
 	if useCase=='maritime' or useCase=='caviar':
 		inputFiles = [f.path for f in os.scandir(inputFolder)]
 	else:
@@ -129,17 +139,19 @@ pass_config = click.make_pass_decorator(Config, ensure=True)
 @click.option('--durations', default='[]', help="In the case of 'predictive' oPIEC, insert a list of duration values for the target complex event.")
 @pass_config
 def cli(config, use_case, dataset, events, threshold, batchsize, memsize, strategy, durations):
+	print('File Name: ' + str(__file__))
+	print('File Location: ' + str(os.path.dirname(__file__)))
 	print('Selected use case: ' + use_case)
 	config.usecase=use_case
-	if dataset=='.':
-		dataset=''
-	elif './' in dataset:
-		dataset=dataset.replace('./','')
-	requestedPath=os.getcwd() + '/' + dataset
-	print('Input data path: ' + requestedPath)
-	rootpath, datapath=splitReqPath(os.path.abspath(requestedPath))
-	config.dataset=dataset
-	config.rootpath=rootpath
+	#if dataset=='.':
+	#	dataset=''
+	#elif './' in dataset:
+	#	dataset=dataset.replace('./','')
+	#requestedPath=os.getcwd() + '/' + dataset
+	#print('Input data path: ' + requestedPath)
+	#rootpath, datapath=splitReqPath(os.path.abspath(requestedPath))
+	config.dataset=os.path.abspath(dataset)
+	config.rootpath=''
 	config.events=events
 	config.threshold=threshold
 	config.batchsize=batchsize
@@ -152,7 +164,7 @@ def cli(config, use_case, dataset, events, threshold, batchsize, memsize, strate
 def run_probec(config):
 	"""Run Prob-EC; The input should be in the /datasets folder."""
 	useCase=config.usecase
-	repoPath=config.rootpath
+	repoPath=pkg_resources.resource_filename("Prob-EC", "probec.pl")#config.rootpath
 	print(repoPath)
 	events=getEvents(useCase,config.events)
 	outFileName=config.dataset.split('/')[-1]
