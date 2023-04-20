@@ -220,10 +220,6 @@ initiatedAt(moving(Person, Person2) = false, T):-
 
 initiatedAt(moving(Person2, Person) = false, T):-
     happensAt(active(Person), T),
-    happensAt( active( Person2 ), T ).
-
-initiatedAt(moving(Person2, Person) = false, T):-
-    happensAt(active(Person), T),
     happensAt( inactive( Person2 ), T ).
 
 % ----- terminate moving: start running

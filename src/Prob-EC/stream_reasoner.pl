@@ -98,12 +98,12 @@ recFVPs([GroundFVP|RestGroundFVPs], T):-
   % If the difference is above 1%, then write the probabilistic 
   % instantaneous recognition for GroundFVP at time-point Tnext
   % in the output and update the probability of cached(holdsAt(GroundFVP)).
-  ((Pdiff>0.01, 
+  ((Pdiff>0.00001, 
   writenl(P, '::holdsAt(', GroundFVP, ',', Tnext, ').'),
   %debugprint(P, '::holdsAt(', GroundFVP, '=', Value, ',', Tnext, ').'),
   retractall(cached(holdsAt(GroundFVP))), 
   assertz((P::cached(holdsAt(GroundFVP)))));
-  Pdiff =< 0.01),
+  Pdiff =< 0.00001),
   % Move to the next GroundFVP.
   recFVPs(RestGroundFVPs, T).
 
@@ -226,10 +226,10 @@ updateFVPs([GroundFVP|RestGroundFVPs], T):-
   subquery(holdsAt(GroundFVP , Tnext), P),
   subquery(cached(holdsAt(GroundFVP)), Pcached),
   Pdiff is abs(P-Pcached),
-  ((Pdiff>0.01, 
+  ((Pdiff>0.00000001, 
   %writenl(P, '::holdsAt(', GroundFluent, '=', Value, ',', Tnext, ').'),
   %debugprint(P, '::holdsAt(', GroundFluent, '=', Value, ',', Tnext, ').'),
   retractall(cached(holdsAt(GroundFVP))), 
   assertz((P::cached(holdsAt(GroundFVP)))));
-  Pdiff =< 0.01),
+  Pdiff =< 0.00000001),
   updateFVPs(RestGroundFVPs, T).

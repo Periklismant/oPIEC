@@ -173,13 +173,13 @@ def run_probec(config):
 	inputFiles = getInputFiles(useCase, inputFolder)
 	probecPath, events, params = getAuxiliary(useCase, repoPath, inputFiles, events)
 	#fluentList, valueList, params = transformFluentsVals(events, params)
-	rawPath = repoPath + '/Prob-EC_output/raw/' + outFileName + '.result'
+	rawPath = repoPath + '/results/Prob-EC_output/raw/' + outFileName + '.result'
 	print("command: problog " + probecPath + params + ' > ' + rawPath)
 	os.system("problog " + probecPath + params + ' > ' + rawPath)
 	print(rawPath)
 
 @cli.command()
-@click.option('--inputPrefix', default='caviar_test', help='The input files for oPIEC are in /Prob-EC_output/preprocessed. \
+@click.option('--inputPrefix', default='caviar_test', help='The input files for oPIEC are in /results/Prob-EC_output/preprocessed. \
 															Specify the prefix of the file name before the event names. \
 															For example, the prefix for "caviar_test_meeting_true.result" is "caviar_test".')
 @pass_config
@@ -207,7 +207,7 @@ def run_pipeline(config):
 	#print(params)
 	#print(fluentList)
 	#print(valueList)
-	rawPath = repoPath + '/Prob-EC_output/raw/' + outFileName + '.result'
+	rawPath = repoPath + '/results/Prob-EC_output/raw/' + outFileName + '.result'
 	
 	os.system("problog " + probecPath + params + ' > ' + rawPath)
 	os.system(repoPath + '/scripts/fixoutput.sh ' + repoPath + ' "' + fluentList + '" "' + valueList + '" ' + outFileName)

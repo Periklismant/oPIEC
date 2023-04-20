@@ -65,9 +65,9 @@ Apart from installing the packages needed for oPIEC, the last command installs a
 
 The following steps describe the execution of the 'run-pipeline' command of the command line interface of oPIEC. There are two other available commands, 'run-probec' and 'run-opiec', which separately execute Prob-EC and oPIEC, respectively. 'run-pipeline' does the following:
 
-- Firstly, Prob-EC processes the input of 'low-level' events and the event description of the application (e.g. /src/Prob-EC/maritime/event_description). The output of Prob-EC is saved in the /Prob-EC_output/raw folder. 
+- Firstly, Prob-EC processes the input of 'low-level' events and the event description of the application (e.g. /src/Prob-EC/maritime/event_description). The output of Prob-EC is saved in the /results/Prob-EC_output/raw folder. 
 
-- Afterwards, an auxiliary script transforms the output of Prob-EC by isolating the probabilities computed for each event. As a result, the recognition of Prob-EC for each complex event is stored in the /Prob-EC_output/preprocessed folder. This format is compatible with oPIEC. 
+- Afterwards, an auxiliary script transforms the output of Prob-EC by isolating the probabilities computed for each event. As a result, the recognition of Prob-EC for each complex event is stored in the /results/Prob-EC_output/preprocessed folder. This format is compatible with oPIEC. 
 
 - Finally, oPIEC is executed for each of the generated files. The final output, produced by oPIEC, is stored in the /oPIEC_output folder and denotes the maximal intervals during which the event takes place.
 

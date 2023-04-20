@@ -18,7 +18,7 @@
 % In order to run Prob-EC from the terminal, execute the following command:
 % 		problog probec.pl -a loader_path -a stream_path  > results_file_path
 % For example: 
-%		problog probec.pl -a ../../applications/caviar/loader.pl -a ../../applications/caviar/datasets/original_strong_1.0.pl  > ../../Prob-EC_output/raw/strong_1.0.result
+%		problog probec.pl -a ../../applications/caviar/loader.pl -a ../../applications/caviar/datasets/original_strong_1.0.pl  > ../../results/Prob-EC_output/raw/strong_1.0.result
 :- use_module(library(assert)).
 :- use_module(library(cut)).
 :- use_module(library(lists)).
